@@ -49,14 +49,7 @@ public:
     std::string _repr;
     _repr += "(" + name;
     if (has_data()) {
-        _repr += ": ";
-      if (value._type == types::_int)
-        _repr += std::to_string(value.value._int);
-      else if (value._type == types::_float)
-        _repr += std::to_string(value.value._float);
-      else
-        _repr += "null";
-      _repr += ")";
+      _repr += ": " + value.to_string() + ")";
     } else {
       _repr += ")";
     }

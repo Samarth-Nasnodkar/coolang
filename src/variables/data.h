@@ -17,6 +17,18 @@ struct data {
     _type = __type;
     value = _value;
   }
+
+  std::string to_string() {
+    std::string _repr;
+    if (_type == types::_int)
+      _repr += std::to_string(value._int);
+    else if (_type == types::_float)
+      _repr += std::to_string(value._float);
+    else
+      _repr += "null";
+    
+    return _repr;
+  }
 };
 
 #endif // DATA_H

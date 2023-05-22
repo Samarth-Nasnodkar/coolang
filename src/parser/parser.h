@@ -7,8 +7,12 @@
 atom : INT | FLOAT
      : LPAREN expr RPAREN
 
-PREC_1 : atom POW atom
+PREC_0 : atom POW atom
        : atom
+
+PREC_1 : PREC_0
+       : PLUS PREC_1
+       : MINUS PREC_1
 
 PREC_2 : PREC_1 MUL PREC_1
        : PREC_1 DIV PREC_1
@@ -77,7 +81,7 @@ public:
     return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Number"));
   }
 
-  std::pair<node *, Error> parsePrec1() {
+  std::pair<node *, Error> parsePrec0() {
     auto left = parseAtom();
     if (left.second.has_error()) return std::make_pair(new node(), left.second);
     if (currentToken.get_name() == "POW") {
@@ -88,6 +92,17 @@ public:
       return std::make_pair(new node{op, node_type::_binary_operator, left.first, right.first}, Error());
     }
     return left;
+  }
+
+  std::pair<node *, Error> parsePrec1() {
+    if (currentToken.get_name() == "ADD" || currentToken.get_name() == "SUB") {
+      auto op = currentToken;
+      advance();
+      auto right = parsePrec1();
+      if (right.second.has_error()) return std::make_pair(new node(), right.second);
+      return std::make_pair(new node{op, node_type::_unary_operator, nullptr, right.first}, Error());
+    }
+    return parsePrec0();
   }
 
   std::pair<node *, Error> parsePrec2() {
