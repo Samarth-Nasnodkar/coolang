@@ -16,6 +16,10 @@ const std::string KEY_POW = "POW";
 const std::string KEY_EQ = "EQ";
 const std::string KEY_LPAREN = "LPAREN";
 const std::string KEY_RPAREN = "RPAREN";
+const std::string KEY_LBRACE = "LBRACE";
+const std::string KEY_RBRACE = "RBRACE";
+const std::string KEY_CODE_BLOCK = "CODE_BLOCK";
+const std::string KEY_NEWLINE = "NEWLINE";
 const std::string KEY_EOF = "EOF";
 
 const std::string KEY_ASSIGN = "let";

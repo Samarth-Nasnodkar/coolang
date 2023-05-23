@@ -4,6 +4,8 @@
 #include<iostream>
 #include<vector>
 #include<map>
+#include<fstream>
+#include<string>
 
 #include <math.h>
 #endif

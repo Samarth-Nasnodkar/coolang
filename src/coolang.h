@@ -10,8 +10,19 @@ public:
     interpreter = Interpreter();
   }
 
-  void run(std::string input) {
-    Lexer lexer(input);
+  void run(std::string fileName) {
+    std::fstream file;
+    file.open(fileName, std::ios::in);
+    if (!file.is_open()) {
+      std::cout << "File not found" << std::endl;
+      return;
+    }
+    std::string content;
+    std::string line;
+    while (std::getline(file, line)) {
+      content += line + "\n";
+    }
+    Lexer lexer(content);
     auto res = lexer.run();
     if (res.second.has_error()) {
      std::cout << res.second.to_string() << std::endl;
@@ -29,15 +40,29 @@ public:
       std::cout << parseRes.second.to_string() << std::endl;
     }
 
+    // for( auto &r : parseRes.first) {
+    //   printNode(r);
+    // }
+    // std::cout << std::endl;
+
     // printNode(parseRes.first);
     // std::cout << std::endl;
     
-    auto interpretRes = interpreter.visit(parseRes.first);
-
-    if (interpretRes.get_error().has_error()) {
-      std::cout << interpretRes.get_error().to_string() << std::endl;
-    } else {
-      std::cout << interpretRes.get_value().to_string() << std::endl;
+    for (auto &node : parseRes.first) {
+      auto interpretRes = interpreter.visit(node);
+      if (interpretRes.get_error().has_error()) {
+        std::cout << interpretRes.get_error().to_string() << std::endl;
+      } else {
+        std::cout << interpretRes.get_value().to_string() << std::endl;
+      }
     }
+
+    // auto interpretRes = interpreter.visit(parseRes.first);
+
+    // if (interpretRes.get_error().has_error()) {
+    //   std::cout << interpretRes.get_error().to_string() << std::endl;
+    // } else {
+    //   std::cout << interpretRes.get_value().to_string() << std::endl;
+    // }
   }
 };

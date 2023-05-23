@@ -20,6 +20,8 @@ const Operator operators[] = {
   (Operator){KEY_EQ, '=', true},
   (Operator){KEY_LPAREN, '(', false},
   (Operator){KEY_RPAREN, ')', false},
+  (Operator){KEY_LBRACE, '{', false},
+  (Operator){KEY_RBRACE, '}', false},
 };
 
 #endif // OPERATORS_H

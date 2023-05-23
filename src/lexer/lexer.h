@@ -2,7 +2,6 @@
 #include "token.h"
 #include "../variables/operators.h"
 #include "../error/error.h"
-#include "../variables/keywords.h"
 
 #ifndef LEXER_H
 #define LEXER_H
@@ -55,6 +54,11 @@ public:
 
     while (currentChar != '\0') {
       if (currentChar == ' ' || currentChar == '\t') {
+        advance();
+        continue;
+      }
+      if (currentChar == '\n') {
+        tokens.emplace_back(Token(std::move(KEY_NEWLINE), currentPos, currentPos));
         advance();
         continue;
       }

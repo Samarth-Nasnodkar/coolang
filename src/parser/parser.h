@@ -4,7 +4,7 @@
 #include "node.h"
 
 /*
-atom : INT | FLOAT
+atom : INT | FLOAT | IDENTIFIER
      : LPAREN expr RPAREN
 
 PREC_0 : atom POW atom
@@ -25,6 +25,9 @@ PREC_3 : PREC_2 ADD PREC_2
 
 expr : PREC_3
      : let IDENTIFIER = expr
+
+code_block : { expr... }
+           : expr EOL | EOF
 */
 
 #ifndef PARSER_H
@@ -50,11 +53,15 @@ public:
     }
   }
 
-  std::pair<node *, Error> parse() {
-    auto res = parseExpr();
-    if (res.second.has_error() && currentToken.get_name() != KEY_EOF) 
-      return std::make_pair(new node(), res.second);
-    return std::make_pair(res.first, Error());
+  std::pair<std::vector<node *>, Error> parse() {
+    std::vector<node *> res;
+    while (currentToken.get_name() != KEY_EOF) {
+      auto _res = parseCodeBlock();
+      if (_res.second.has_error()) return std::make_pair(std::vector<node *>(), _res.second);
+      res.push_back(_res.first);
+      advance();
+    }
+    return std::make_pair(res, Error());
   }
 
   std::pair<node *, Error> parseAtom() {
@@ -149,9 +156,40 @@ public:
       advance();
       auto expr = parseExpr();
       if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
+
+      if (currentToken.get_name() != KEY_NEWLINE && currentToken.get_name() != KEY_EOF) {
+        return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected new line"));
+      }
+
       return std::make_pair(new node{identifier, node_type::_variable_assign, expr.first, nullptr}, Error());
     }
     return parsePrec3();
+  }
+
+  std::pair<node *, Error> parseCodeBlock() {
+    if (currentToken.get_name() == KEY_LBRACE) {
+      advance();
+      std::vector<node *> nodes;
+      while (currentToken.get_name() != KEY_RBRACE) {
+        if (currentToken.get_name() == KEY_NEWLINE) {
+          advance();
+          continue;
+        }
+        if (currentToken.get_name() == KEY_LBRACE) {
+          auto code_block = parseCodeBlock();
+          if (code_block.second.has_error()) return std::make_pair(new node(), code_block.second);
+          nodes.push_back(code_block.first);
+          continue;
+        }
+        auto expr = parseExpr();
+        if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
+        nodes.push_back(expr.first);
+      }
+      advance();
+      return std::make_pair(new node{Token(KEY_CODE_BLOCK, CursorPosition(), CursorPosition()), node_type::_code_block, nullptr, nullptr, nodes}, Error());
+    }
+
+    return parseExpr();
   }
 };
 

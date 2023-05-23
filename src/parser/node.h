@@ -7,8 +7,9 @@
 struct node {
   Token token;
   node_type value;
-  struct node *left;
-  struct node *right;
+  node *left;
+  node *right;
+  std::vector<node *> children;
 };
 
 std::string node_type_to_string(node_type type) {
@@ -23,6 +24,8 @@ std::string node_type_to_string(node_type type) {
       return "variable_assign";
     case node_type::_variable_access:
       return "variable_access";
+    case node_type::_code_block:
+      return "code_block";
     default:
       return "unknown";
   }
@@ -50,6 +53,14 @@ void printNode(node *node) {
   }
   else if (node->value == node_type::_variable_access) {
     std::cout << node->token.get_name() << "(" << node_type_to_string(node->value) << ") ";
+  }
+  else if (node->value == node_type::_code_block) {
+    std::cout << "code_block(" << node_type_to_string(node->value) << ") ";
+    std::cout << "{ ";
+    for(auto child : node->children) {
+      printNode(child);
+    }
+    std::cout << "} ";
   }
   else {
     std::cout << node->token.to_string() << "(" << node_type_to_string(node->value) << ") ";
