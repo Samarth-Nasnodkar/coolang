@@ -5,7 +5,8 @@ enum node_type {
   _number,
   _unary_operator,
   _binary_operator,
-  _variable,
+  _variable_assign,
+  _variable_access
 };
 
 #endif // NODE_TYPE_H

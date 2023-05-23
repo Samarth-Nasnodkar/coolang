@@ -4,8 +4,10 @@
 #include "interpreter/interpreter.h"
 
 class Coolang {
+Interpreter interpreter;
 public:
   Coolang() {
+    interpreter = Interpreter();
   }
 
   void run(std::string input) {
@@ -16,14 +18,21 @@ public:
      return;
     }
 
+    // for( auto &token : res.first) {
+    //   std::cout << token.to_string() << " ";
+    // }
+    // std::cout << std::endl;
+
     Parser parser(res.first);
     auto parseRes = parser.parse();
     if (parseRes.second.has_error()) {
       std::cout << parseRes.second.to_string() << std::endl;
     }
+
+    // printNode(parseRes.first);
+    // std::cout << std::endl;
     
-    Interpreter interpreter;
-    auto interpretRes = interpreter.visit(parseRes.first[0]);
+    auto interpretRes = interpreter.visit(parseRes.first);
 
     if (interpretRes.get_error().has_error()) {
       std::cout << interpretRes.get_error().to_string() << std::endl;

@@ -24,6 +24,7 @@ PREC_3 : PREC_2 ADD PREC_2
         : PREC_2
 
 expr : PREC_3
+     : let IDENTIFIER = expr
 */
 
 #ifndef PARSER_H
@@ -45,18 +46,15 @@ public:
     if (currentTokenIndex < tokens.size()) {
       currentToken = tokens[currentTokenIndex];
     } else {
-      currentToken = Token("EOF", CursorPosition(), CursorPosition());
+      currentToken = Token(KEY_EOF, CursorPosition(), CursorPosition());
     }
   }
 
-  std::pair<std::vector<node *>, Error> parse() {
-    std::vector<node *> nodes;
-    while (currentToken.get_name() != "EOF") {
-      auto res = parseExpr();
-      if (res.second.has_error()) return std::make_pair(nodes, res.second);
-      nodes.push_back(res.first);
-    }
-    return std::make_pair(nodes, Error());
+  std::pair<node *, Error> parse() {
+    auto res = parseExpr();
+    if (res.second.has_error() && currentToken.get_name() != KEY_EOF) 
+      return std::make_pair(new node(), res.second);
+    return std::make_pair(res.first, Error());
   }
 
   std::pair<node *, Error> parseAtom() {
@@ -67,15 +65,21 @@ public:
       return std::make_pair(_node, Error());
     } 
 
-    if (currentToken.get_name() == "LPAREN") {
+    if (currentToken.get_name() == KEY_LPAREN) {
       advance();
       auto expr = parseExpr();
       if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
-      if (currentToken.get_name() != "RPAREN") {
+      if (currentToken.get_name() != KEY_RPAREN) {
         return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected ')'"));
       }
       advance();
       return expr;
+    }
+
+    if (currentToken.get_value()._type == types::_id) {
+      node *_node = new node{currentToken, node_type::_variable_access, nullptr, nullptr};
+      advance();
+      return std::make_pair(_node, Error());
     }
 
     return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Number"));
@@ -84,7 +88,7 @@ public:
   std::pair<node *, Error> parsePrec0() {
     auto left = parseAtom();
     if (left.second.has_error()) return std::make_pair(new node(), left.second);
-    if (currentToken.get_name() == "POW") {
+    if (currentToken.get_name() == KEY_POW) {
       auto op = currentToken;
       advance();
       auto right = parseAtom();
@@ -95,7 +99,7 @@ public:
   }
 
   std::pair<node *, Error> parsePrec1() {
-    if (currentToken.get_name() == "ADD" || currentToken.get_name() == "SUB") {
+    if (currentToken.get_name() == KEY_ADD || currentToken.get_name() == KEY_SUB) {
       auto op = currentToken;
       advance();
       auto right = parsePrec1();
@@ -108,7 +112,7 @@ public:
   std::pair<node *, Error> parsePrec2() {
     auto left = parsePrec1();
     if (left.second.has_error()) return std::make_pair(new node(), left.second);
-    if (currentToken.get_name() == "MUL" || currentToken.get_name() == "DIV" || currentToken.get_name() == "MOD") {
+    if (currentToken.get_name() == KEY_MUL || currentToken.get_name() == KEY_DIV || currentToken.get_name() == KEY_MOD) {
       auto op = currentToken;
       advance();
       auto right = parsePrec1();
@@ -121,7 +125,7 @@ public:
   std::pair<node *, Error> parsePrec3() {
     auto left = parsePrec2();
     if (left.second.has_error()) return std::make_pair(new node(), left.second);
-    if (currentToken.get_name() == "ADD" || currentToken.get_name() == "SUB") {
+    if (currentToken.get_name() == KEY_ADD || currentToken.get_name() == KEY_SUB) {
       auto op = currentToken;
       advance();
       auto right = parsePrec2();
@@ -132,6 +136,21 @@ public:
   }
 
   std::pair<node *, Error> parseExpr() {
+    if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_ASSIGN) {
+      advance();
+      if (currentToken.get_value()._type != types::_id) {
+        return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Identifier"));
+      }
+      auto identifier = currentToken;
+      advance();
+      if (currentToken.get_name() != KEY_EQ) {
+        return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected '='"));
+      }
+      advance();
+      auto expr = parseExpr();
+      if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
+      return std::make_pair(new node{identifier, node_type::_variable_assign, expr.first, nullptr}, Error());
+    }
     return parsePrec3();
   }
 };

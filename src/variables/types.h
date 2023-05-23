@@ -5,6 +5,8 @@ enum types {
   _int,
   _float,
   _char,
+  _keyword,
+  _id,
   _null,
 };
 
