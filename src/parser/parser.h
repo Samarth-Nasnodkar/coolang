@@ -1,6 +1,7 @@
 #include "../includes.h"
 #include "../lexer/lexer.h"
 #include "../lexer/token.h"
+#include "../variables/cmp.h"
 #include "node.h"
 
 /*
@@ -23,11 +24,13 @@ PREC_3 : PREC_2 ADD PREC_2
         : PREC_2 SUB PREC_2
         : PREC_2
 
-expr : PREC_3
-     : let IDENTIFIER = expr
+cond : PREC_3 cmp PREC_3
+     : PREC_3
 
-code_block : { expr... }
-           : expr EOL | EOF
+PREC_TOP : let IDENTIFIER EQ cond
+
+code_block : { cond... }
+           : cond EOL | EOF
 */
 
 #ifndef PARSER_H
@@ -51,6 +54,20 @@ public:
     } else {
       currentToken = Token(KEY_EOF, CursorPosition(), CursorPosition());
     }
+    // std::cout << currentToken.to_string() << std::endl;
+  }
+
+  bool isUnary() {
+    return currentToken.get_name() == KEY_ADD || currentToken.get_name() == KEY_SUB || currentToken.get_name() == KEY_NOT;
+  }
+
+  bool isCmp() {
+    for (auto cmp : cmps) {
+      if (cmp.name == currentToken.get_name()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   std::pair<std::vector<node *>, Error> parse() {
@@ -65,16 +82,26 @@ public:
   }
 
   std::pair<node *, Error> parseAtom() {
-
+    if (currentToken.get_value()._type == types::_null) {
+      node *_node = new node{currentToken, node_type::_nullnode, nullptr, nullptr};
+      advance();
+      return std::make_pair(_node, Error());
+    }
     if (currentToken.get_value()._type == types::_int || currentToken.get_value()._type == types::_float) {
       node *_node = new node{currentToken, node_type::_number, nullptr, nullptr};
       advance();
       return std::make_pair(_node, Error());
     } 
 
+    if (currentToken.get_value()._type == types::_bool) {
+      node *_node = new node{currentToken, node_type::_boolean, nullptr, nullptr};
+      advance();
+      return std::make_pair(_node, Error());
+    }
+
     if (currentToken.get_name() == KEY_LPAREN) {
       advance();
-      auto expr = parseExpr();
+      auto expr = parsePrec3();
       if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
       if (currentToken.get_name() != KEY_RPAREN) {
         return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected ')'"));
@@ -88,6 +115,8 @@ public:
       advance();
       return std::make_pair(_node, Error());
     }
+
+    std::cout << currentToken.to_string() << std::endl;
 
     return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Number"));
   }
@@ -106,7 +135,7 @@ public:
   }
 
   std::pair<node *, Error> parsePrec1() {
-    if (currentToken.get_name() == KEY_ADD || currentToken.get_name() == KEY_SUB) {
+    if (isUnary()) {
       auto op = currentToken;
       advance();
       auto right = parsePrec1();
@@ -142,7 +171,19 @@ public:
     return left;
   }
 
-  std::pair<node *, Error> parseExpr() {
+  std::pair<node *, Error> parseCond() {
+    auto expr = parsePrec3();
+    if (isCmp()) {
+      auto op = currentToken;
+      advance();
+      auto expr2 = parsePrec3();
+      if (expr2.second.has_error()) return std::make_pair(new node(), expr2.second);
+      return std::make_pair(new node{op, node_type::_binary_operator, expr.first, expr2.first}, Error());
+    }
+    return expr;
+  }
+
+  std::pair<node *, Error> parsePrecTop() {
     if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_ASSIGN) {
       advance();
       if (currentToken.get_value()._type != types::_id) {
@@ -154,7 +195,7 @@ public:
         return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected '='"));
       }
       advance();
-      auto expr = parseExpr();
+      auto expr = parseCond();
       if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
 
       if (currentToken.get_name() != KEY_NEWLINE && currentToken.get_name() != KEY_EOF) {
@@ -163,7 +204,7 @@ public:
 
       return std::make_pair(new node{identifier, node_type::_variable_assign, expr.first, nullptr}, Error());
     }
-    return parsePrec3();
+    return parseCond();
   }
 
   std::pair<node *, Error> parseCodeBlock() {
@@ -181,7 +222,7 @@ public:
           nodes.push_back(code_block.first);
           continue;
         }
-        auto expr = parseExpr();
+        auto expr = parsePrecTop();
         if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
         nodes.push_back(expr.first);
       }
@@ -189,7 +230,7 @@ public:
       return std::make_pair(new node{Token(KEY_CODE_BLOCK, CursorPosition(), CursorPosition()), node_type::_code_block, nullptr, nullptr, nodes}, Error());
     }
 
-    return parseExpr();
+    return parsePrecTop();
   }
 };
 

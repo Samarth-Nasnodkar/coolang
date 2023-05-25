@@ -24,6 +24,9 @@ struct data {
       _repr += std::to_string(value._int);
     else if (_type == types::_float)
       _repr += std::to_string(value._float);
+    else if (_type == types::_bool) {
+      _repr += value._bool ? "true" : "false";
+    }
     else
       _repr += "null";
     

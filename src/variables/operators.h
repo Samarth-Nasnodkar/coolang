@@ -11,17 +11,17 @@ struct Operator {
 };
 
 const Operator operators[] = {
-  (Operator){KEY_ADD, '+', true},
-  (Operator){KEY_SUB, '-', true},
-  (Operator){KEY_MUL, '*', true},
-  (Operator){KEY_DIV, '/', true},
-  (Operator){KEY_MOD, '%', true},
-  (Operator){KEY_POW, '^', true},
-  (Operator){KEY_EQ, '=', true},
-  (Operator){KEY_LPAREN, '(', false},
-  (Operator){KEY_RPAREN, ')', false},
-  (Operator){KEY_LBRACE, '{', false},
-  (Operator){KEY_RBRACE, '}', false},
+  {KEY_ADD, '+', true},
+  {KEY_SUB, '-', true},
+  {KEY_MUL, '*', true},
+  {KEY_DIV, '/', true},
+  {KEY_MOD, '%', true},
+  {KEY_POW, '^', true},
+  {KEY_NOT, '!', false},
+  {KEY_LPAREN, '(', false},
+  {KEY_RPAREN, ')', false},
+  {KEY_LBRACE, '{', false},
+  {KEY_RBRACE, '}', false},
 };
 
 #endif // OPERATORS_H

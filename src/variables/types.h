@@ -8,6 +8,7 @@ enum types {
   _keyword,
   _id,
   _null,
+  _bool
 };
 
 #endif // TYPES_H

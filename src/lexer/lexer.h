@@ -58,8 +58,20 @@ public:
         continue;
       }
       if (currentChar == '\n') {
+        while (currentChar == '\n') advance();
         tokens.emplace_back(Token(std::move(KEY_NEWLINE), currentPos, currentPos));
-        advance();
+        continue;
+      }
+      if (currentChar == '=') {
+        tokens.emplace_back(makeEq());
+        continue;
+      }
+      if (currentChar == '<') {
+        tokens.emplace_back(makeLTE());
+        continue;
+      }
+      if (currentChar == '>') {
+        tokens.emplace_back(makeGTE());
         continue;
       }
       int op_index = isOperator();
@@ -87,6 +99,42 @@ public:
     CursorPosition endPos = currentPos;
     tokens.emplace_back(Token(KEY_EOF, currentPos, endPos));
     return std::make_pair(tokens, Error());
+  }
+
+  Token makeLTE() {
+    CursorPosition startpos = currentPos;
+    advance();
+
+    if (currentChar == '=') {
+      advance();
+      return Token(KEY_LE, startpos, currentPos);
+    }
+
+    return Token(KEY_LT, startpos, currentPos);
+  }
+
+  Token makeGTE() {
+    CursorPosition startpos = currentPos;
+    advance();
+
+    if (currentChar == '=') {
+      advance();
+      return Token(KEY_GE, startpos, currentPos);
+    }
+
+    return Token(KEY_GT, startpos, currentPos);
+  }
+
+  Token makeEq() {
+    CursorPosition startpos = currentPos;
+    advance();
+
+    if (currentChar == '=') {
+      advance();
+      return Token(KEY_EE, startpos, currentPos);
+    }
+
+    return Token(KEY_EQ, startpos, currentPos);
   }
 
   Token makeNumberToken() {
@@ -124,6 +172,17 @@ public:
       advance();
     }
     if (isKeyword(id_str)) {
+      type_value v;
+      if (id_str == KEY_TRUE) {
+        v._bool = true;
+        return {id_str, {types::_bool, v}, startPos, currentPos};
+      } else if (id_str == KEY_FALSE) {
+        v._bool = false;
+        return {id_str, {types::_bool, v}, startPos, currentPos};
+      } else if (id_str == KEY_NULL) {
+        v._int = 0;
+        return {id_str, {types::_null, v}, startPos, currentPos};
+      }
       return {id_str, {types::_keyword, type_value()}, startPos, currentPos};
     } else {
       return {id_str, {types::_id, type_value()}, startPos, currentPos};

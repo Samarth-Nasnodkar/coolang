@@ -22,10 +22,24 @@ const std::string KEY_CODE_BLOCK = "CODE_BLOCK";
 const std::string KEY_NEWLINE = "NEWLINE";
 const std::string KEY_EOF = "EOF";
 
+const std::string KEY_LE = "LE";
+const std::string KEY_LT = "LT";
+const std::string KEY_GE = "GE";
+const std::string KEY_GT = "GT";
+const std::string KEY_EE = "EE";
+const std::string KEY_NE = "NE";
+const std::string KEY_NOT = "NOT";
+
 const std::string KEY_ASSIGN = "let";
+const std::string KEY_TRUE = "true";
+const std::string KEY_FALSE = "false";
+const std::string KEY_NULL = "null";
 
 const std::string keywords[] = {
-  KEY_ASSIGN
+  KEY_ASSIGN,
+  KEY_TRUE,
+  KEY_FALSE,
+  KEY_NULL
 };
 
 #endif // KEYWORDS_H

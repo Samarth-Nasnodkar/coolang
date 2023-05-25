@@ -21,6 +21,12 @@ public:
       case node_type::_number: {
         return RuntimeResult().success(_node->token.get_value());
       }
+      case node_type::_boolean: {
+        return RuntimeResult().success(_node->token.get_value());
+      }
+      case node_type::_nullnode: {
+        return RuntimeResult().success(_node->token.get_value());
+      }
       case node_type::_unary_operator: {
         auto right = visit(_node->right);
         if (right.has_error()) return right;
@@ -47,6 +53,18 @@ public:
           return RuntimeResult().success(mod(left.get_value(), right.get_value()));
         } else if (_node->token.get_name() == KEY_POW) {
           return RuntimeResult().success(pow(left.get_value(), right.get_value()));
+        } else if (_node->token.get_name() == KEY_EE) {
+          return RuntimeResult().success(ee(left.get_value(), right.get_value()));
+        } else if (_node->token.get_name() == KEY_NE) {
+          return RuntimeResult().success(ne(left.get_value(), right.get_value()));
+        } else if (_node->token.get_name() == KEY_LT) {
+          return RuntimeResult().success(lt(left.get_value(), right.get_value()));
+        } else if (_node->token.get_name() == KEY_GT) {
+          return RuntimeResult().success(gt(left.get_value(), right.get_value()));
+        } else if (_node->token.get_name() == KEY_LE) {
+          return RuntimeResult().success(lt(left.get_value(), right.get_value()));
+        } else if (_node->token.get_name() == KEY_GE) {
+          return RuntimeResult().success(gt(left.get_value(), right.get_value()));
         }
       }
       case node_type::_variable_assign: {
