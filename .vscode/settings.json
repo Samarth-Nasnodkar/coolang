@@ -82,6 +82,8 @@
     "codecvt": "cpp",
     "fstream": "cpp",
     "iomanip": "cpp",
-    "stack": "cpp"
+    "stack": "cpp",
+    "__memory": "cpp",
+    "filesystem": "cpp"
   }
 }

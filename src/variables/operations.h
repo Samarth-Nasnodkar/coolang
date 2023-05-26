@@ -144,6 +144,61 @@ data neg(data a) {
   }
 }
 
+data logic_not(data a) {
+  type_value res;
+  // if (asInt(a)) {
+  //   res._bool = !a.value._bool;
+  //   return {types::_bool, res};
+  // } else if (a._type == types::_float) {
+  //   res._bool = !a.value._float;
+  //   return {types::_bool, res};
+  // }
+  res._bool = !a.value._int;
+  return {types::_bool, res};
+}
+
+data logic_and(data a, data b) {
+  type_value res;
+  // if (asInt(a) && asInt(b)) {
+  //   res._bool = a.value._int && b.value._int;
+  //   return data(types::_bool, res);
+  // } else if (asInt(a) && b._type == types::_float) {
+  //   res._bool = a.value._int && b.value._float;
+  //   return data(types::_bool, res);
+  // } else if (a._type == types::_float && asInt(b)) {
+  //   res._bool = a.value._float && b.value._int;
+  //   return data(types::_bool, res);
+  // } else if (a._type == types::_float && b._type == types::_float) {
+  //   res._bool = a.value._float && b.value._float;
+  //   return data(types::_bool, res);
+  // } else {
+  //   return data();
+  // }
+  res._bool = a.value._int && b.value._int;
+  return data(types::_bool, res);
+}
+
+data logic_or(data a, data b) {
+  type_value res;
+  // if (asInt(a) && asInt(b)) {
+  //   res._bool = a.value._int || b.value._int;
+  //   return data(types::_bool, res);
+  // } else if (asInt(a) && b._type == types::_float) {
+  //   res._bool = a.value._int || b.value._float;
+  //   return data(types::_bool, res);
+  // } else if (a._type == types::_float && asInt(b)) {
+  //   res._bool = a.value._float || b.value._int;
+  //   return data(types::_bool, res);
+  // } else if (a._type == types::_float && b._type == types::_float) {
+  //   res._bool = a.value._float || b.value._float;
+  //   return data(types::_bool, res);
+  // } else {
+  //   return data();
+  // }
+  res._bool = a.value._int || b.value._int;
+  return data(types::_bool, res);
+}
+
 data le(data a, data b) {
   type_value res;
   if (asInt(a) && asInt(b)) {

@@ -4,7 +4,7 @@
 #include "interpreter/interpreter.h"
 
 class Coolang {
-Interpreter interpreter;
+  Interpreter interpreter;
 public:
   Coolang() {
     interpreter = Interpreter();
@@ -50,10 +50,11 @@ public:
     
     for (auto &node : parseRes.first) {
       auto interpretRes = interpreter.visit(node);
-      if (interpretRes.get_error().has_error()) {
-        std::cout << interpretRes.get_error().to_string() << std::endl;
+      if (interpretRes[interpretRes.size() - 1].get_error().has_error()) {
+        std::cout << interpretRes[0].get_error().to_string() << std::endl;
       } else {
-        std::cout << interpretRes.get_value().to_string() << std::endl;
+        for(auto &_res : interpretRes)
+          std::cout << _res.get_value().to_string() << std::endl;
       }
     }
 

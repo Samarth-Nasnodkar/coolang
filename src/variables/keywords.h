@@ -28,18 +28,26 @@ const std::string KEY_GE = "GE";
 const std::string KEY_GT = "GT";
 const std::string KEY_EE = "EE";
 const std::string KEY_NE = "NE";
-const std::string KEY_NOT = "NOT";
+const std::string KEY_NOT = "not";
+
+const std::string KEY_AND = "and";
+const std::string KEY_OR = "or";
 
 const std::string KEY_ASSIGN = "let";
+const std::string KEY_MUT = "mut";
 const std::string KEY_TRUE = "true";
 const std::string KEY_FALSE = "false";
 const std::string KEY_NULL = "null";
 
 const std::string keywords[] = {
   KEY_ASSIGN,
+  KEY_MUT,
   KEY_TRUE,
   KEY_FALSE,
-  KEY_NULL
+  KEY_NULL,
+  KEY_AND,
+  KEY_OR,
+  KEY_NOT
 };
 
 #endif // KEYWORDS_H

@@ -62,8 +62,13 @@ public:
         tokens.emplace_back(Token(std::move(KEY_NEWLINE), currentPos, currentPos));
         continue;
       }
-      if (currentChar == '=') {
-        tokens.emplace_back(makeEq());
+      if (currentChar == '=' || currentChar == '!') {
+        auto res = makeEq();
+        if (!res.has_data() && res.get_name().length() == 0) {
+          tokens.clear();
+          return {tokens, Error("Invalid Syntax Error", "Expected '='")};
+        }
+        tokens.emplace_back(res);
         continue;
       }
       if (currentChar == '<') {
@@ -126,15 +131,17 @@ public:
   }
 
   Token makeEq() {
+    bool ne = (currentChar == '!');
     CursorPosition startpos = currentPos;
     advance();
 
     if (currentChar == '=') {
       advance();
-      return Token(KEY_EE, startpos, currentPos);
+      return Token(ne ? KEY_NE : KEY_EE, startpos, currentPos);
     }
-
-    return Token(KEY_EQ, startpos, currentPos);
+    if (!ne)
+      return Token(KEY_EQ, startpos, currentPos);
+    return Token();
   }
 
   Token makeNumberToken() {

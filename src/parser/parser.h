@@ -2,11 +2,12 @@
 #include "../lexer/lexer.h"
 #include "../lexer/token.h"
 #include "../variables/cmp.h"
+#include "../variables/logic_operators.h"
 #include "node.h"
 
 /*
 atom : INT | FLOAT | IDENTIFIER
-     : LPAREN expr RPAREN
+     : LPAREN PREC_5 RPAREN
 
 PREC_0 : atom POW atom
        : atom
@@ -14,6 +15,7 @@ PREC_0 : atom POW atom
 PREC_1 : PREC_0
        : PLUS PREC_1
        : MINUS PREC_1
+       : NOT PREC_1
 
 PREC_2 : PREC_1 MUL PREC_1
        : PREC_1 DIV PREC_1
@@ -21,13 +23,16 @@ PREC_2 : PREC_1 MUL PREC_1
        : PREC_1
 
 PREC_3 : PREC_2 ADD PREC_2
-        : PREC_2 SUB PREC_2
-        : PREC_2
+       : PREC_2 SUB PREC_2
+       : PREC_2
 
-cond : PREC_3 cmp PREC_3
-     : PREC_3
+PREC_4 : PREC_3 AND PREC_3
+       : PREC_3
 
-PREC_TOP : let IDENTIFIER EQ cond
+PREC_5 : PREC_4 OR PREC_4
+       : PREC_4
+
+PREC_TOP : let (mut) IDENTIFIER EQ cond
 
 code_block : { cond... }
            : cond EOL | EOF
@@ -57,6 +62,15 @@ public:
     // std::cout << currentToken.to_string() << std::endl;
   }
 
+  void reverse(int amount = 1) {
+    currentTokenIndex -= amount;
+    if (currentTokenIndex >= 0) {
+      currentToken = tokens[currentTokenIndex];
+    } else {
+      currentToken = Token(KEY_EOF, CursorPosition(), CursorPosition());
+    }
+  }
+
   bool isUnary() {
     return currentToken.get_name() == KEY_ADD || currentToken.get_name() == KEY_SUB || currentToken.get_name() == KEY_NOT;
   }
@@ -82,7 +96,8 @@ public:
   }
 
   std::pair<node *, Error> parseAtom() {
-    if (currentToken.get_value()._type == types::_null) {
+    // std::cout << currentToken.to_string() << std::endl;
+    if (currentToken.get_value()._type == types::_null && currentToken.has_data()) {
       node *_node = new node{currentToken, node_type::_nullnode, nullptr, nullptr};
       advance();
       return std::make_pair(_node, Error());
@@ -101,7 +116,7 @@ public:
 
     if (currentToken.get_name() == KEY_LPAREN) {
       advance();
-      auto expr = parsePrec3();
+      auto expr = parsePrec5();
       if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
       if (currentToken.get_name() != KEY_RPAREN) {
         return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected ')'"));
@@ -115,8 +130,6 @@ public:
       advance();
       return std::make_pair(_node, Error());
     }
-
-    std::cout << currentToken.to_string() << std::endl;
 
     return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Number"));
   }
@@ -171,9 +184,10 @@ public:
     return left;
   }
 
-  std::pair<node *, Error> parseCond() {
+  std::pair<node *, Error> parsePrec4() {
     auto expr = parsePrec3();
-    if (isCmp()) {
+    if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
+    if (currentToken.get_name() == KEY_AND) {
       auto op = currentToken;
       advance();
       auto expr2 = parsePrec3();
@@ -183,11 +197,30 @@ public:
     return expr;
   }
 
+  std::pair<node *, Error> parsePrec5() {
+    auto prec4 = parsePrec4();
+    if (prec4.second.has_error()) return std::make_pair(new node(), prec4.second);
+    if (currentToken.get_name() == KEY_OR) {
+      auto op = currentToken;
+      advance();
+      auto cond2 = parsePrec4();
+      if (cond2.second.has_error()) return std::make_pair(new node(), cond2.second);
+      return std::make_pair(new node{op, node_type::_binary_operator, prec4.first, cond2.first}, Error());
+    }
+    return prec4;
+  }
+
   std::pair<node *, Error> parsePrecTop() {
     if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_ASSIGN) {
+      bool mut = false;
       advance();
       if (currentToken.get_value()._type != types::_id) {
-        return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Identifier"));
+        if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_MUT) {
+          mut = true;
+          advance();
+        } else {
+          return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Identifier"));
+        }
       }
       auto identifier = currentToken;
       advance();
@@ -195,16 +228,34 @@ public:
         return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected '='"));
       }
       advance();
-      auto expr = parseCond();
+      auto expr = parsePrec5();
       if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
 
-      if (currentToken.get_name() != KEY_NEWLINE && currentToken.get_name() != KEY_EOF) {
-        return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected new line"));
-      }
+      // if (currentToken.get_name() != KEY_NEWLINE && currentToken.get_name() != KEY_EOF) {
+      //   return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected new line"));
+      // }
 
-      return std::make_pair(new node{identifier, node_type::_variable_assign, expr.first, nullptr}, Error());
+      return std::make_pair(new node{identifier, mut ? node_type::_variable_assign_mut : node_type::_variable_assign, expr.first, nullptr}, Error());
     }
-    return parseCond();
+
+    if (currentToken.get_value()._type == types::_id) {
+      auto identifier = currentToken;
+      advance();
+      if (currentToken.get_name() != KEY_EQ) {
+        reverse();
+        return parsePrec5();
+      }
+      advance();
+      auto expr = parsePrec5();
+      if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
+
+      // if (currentToken.get_name() != KEY_NEWLINE && currentToken.get_name() != KEY_EOF) {
+      //   return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected new line"));
+      // }
+
+      return std::make_pair(new node{identifier, node_type::_variable_reassign, expr.first, nullptr}, Error());
+    }
+    return parsePrec5();  
   }
 
   std::pair<node *, Error> parseCodeBlock() {

@@ -17,7 +17,6 @@ const Operator operators[] = {
   {KEY_DIV, '/', true},
   {KEY_MOD, '%', true},
   {KEY_POW, '^', true},
-  {KEY_NOT, '!', false},
   {KEY_LPAREN, '(', false},
   {KEY_RPAREN, ')', false},
   {KEY_LBRACE, '{', false},

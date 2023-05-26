@@ -1,1 +1,4 @@
-null <= 10
+let mut b = 5
+let a = 20
+b = a
+a = b

@@ -22,6 +22,8 @@ std::string node_type_to_string(node_type type) {
       return "binary_operator";
     case node_type::_variable_assign:
       return "variable_assign";
+    case node_type::_variable_reassign:
+      return "variable_reassign";
     case node_type::_variable_access:
       return "variable_access";
     case node_type::_code_block:
