@@ -38,6 +38,9 @@ const std::string KEY_MUT = "mut";
 const std::string KEY_TRUE = "true";
 const std::string KEY_FALSE = "false";
 const std::string KEY_NULL = "null";
+const std::string KEY_IF = "if";
+const std::string KEY_ELSE = "else";
+const std::string KEY_ELIF = "elif";
 
 const std::string keywords[] = {
   KEY_ASSIGN,
@@ -47,7 +50,10 @@ const std::string keywords[] = {
   KEY_NULL,
   KEY_AND,
   KEY_OR,
-  KEY_NOT
+  KEY_NOT,
+  KEY_IF,
+  KEY_ELIF,
+  KEY_ELSE,
 };
 
 #endif // KEYWORDS_H

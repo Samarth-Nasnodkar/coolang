@@ -144,6 +144,21 @@ public:
         scopes.erase(scopes.begin() + scopeIndex);
         return result;
       }
+      case node_type::_if_else : {
+        auto _cond = visit(_node->left);
+        data _res = type_cast(_cond[_cond.size() - 1].get_value(), _bool);
+        if (_res.value._bool) {
+          return visit(_node->right);
+        }
+        for (auto elif : _node->children) {
+          if (elif->token.get_name() == KEY_ELSE) return visit(elif->right);
+          _cond = visit(elif->left);
+          _res = type_cast(_cond[_cond.size() - 1].get_value(), _bool);
+          if (_res.value._bool) {
+            return visit(elif->right);
+          }
+        }
+      }
       default: {
         return {RuntimeResult().failure(Error("Invalid Syntax Error", "Expected Number"))};
       }

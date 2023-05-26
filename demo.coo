@@ -1,4 +1,11 @@
-let mut b = 5
-let a = 20
-b = a
-a = b
+let a = 11
+
+if a % 15 == 0 {
+  let b = 0
+} elif a % 5 == 0 {
+  let b = 1
+} elif a % 3 == 0 {
+  let b = 2
+} else {
+  a
+}
