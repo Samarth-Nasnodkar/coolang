@@ -82,19 +82,7 @@ public:
         if (value[value.size() - 1].has_error()) return value;
         // std::cout << (*_scope)->localScope.size() << std::endl;
         scopes[scopeIndex].localScope[_node->token.get_name()] = value[value.size() - 1].get_value();
-        scopes[scopeIndex].mutables[_node->token.get_name()] = false;
         // std::cout << (*_scope)->localScope.size() << std::endl;
-        return {RuntimeResult().success(value[value.size() - 1].get_value())};
-      }
-      case node_type::_variable_assign_mut: {
-        if (scopes[scopeIndex].localScope.find(_node->token.get_name()) != scopes[scopeIndex].localScope.end()) {
-          return {RuntimeResult().failure(Error("Name Error", "Variable is already defined"))};
-        }
-        auto value = visit(_node->left);
-        if (value[value.size() - 1].has_error()) return value;
-        // std::cout << (*_scope)->localScope.size() << std::endl;
-        scopes[scopeIndex].localScope[_node->token.get_name()] = value[value.size() - 1].get_value();
-        scopes[scopeIndex].mutables[_node->token.get_name()] = true;
         return {RuntimeResult().success(value[value.size() - 1].get_value())};
       }
       case node_type::_variable_reassign: {
@@ -104,9 +92,6 @@ public:
         }
         if (itr == -1) {
           return {RuntimeResult().failure(Error("Name Error", "Unidentified token '" + _node->token.get_name() + "'"))};
-        }
-        if (scopes[itr].mutables[_node->token.get_name()] == false) {
-          return {RuntimeResult().failure(Error("Assignment Error", "Cannot reassign immutable variable '" + _node->token.get_name() + "'"))};
         }
         auto value = visit(_node->left);
         if (value[value.size() - 1].has_error()) return value;
@@ -158,6 +143,7 @@ public:
             return visit(elif->right);
           }
         }
+        return {RuntimeResult()};
       }
       default: {
         return {RuntimeResult().failure(Error("Invalid Syntax Error", "Expected Number"))};

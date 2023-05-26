@@ -38,7 +38,7 @@ PREC_6 : PREC_5 AND PREC_5
 PREC_7 : PREC_6 OR PREC_6
        : PREC_6
 
-PREC_TOP : let (mut) IDENTIFIER EQ PREC_5
+PREC_TOP : let IDENTIFIER EQ PREC_5
          : PREC_5
 
 PREC_IF : if PREC_TOP CODE_BLOCK else (if PREC_TOP) CODE_BLOCK
@@ -252,15 +252,9 @@ public:
 
   std::pair<node *, Error> parsePrecTop() {
     if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_ASSIGN) {
-      bool mut = false;
       advance();
       if (currentToken.get_value()._type != types::_id) {
-        if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_MUT) {
-          mut = true;
-          advance();
-        } else {
-          return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Identifier"));
-        }
+        return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Identifier"));
       }
       auto identifier = currentToken;
       advance();
@@ -275,7 +269,7 @@ public:
       //   return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected new line"));
       // }
 
-      return std::make_pair(new node{identifier, mut ? node_type::_variable_assign_mut : node_type::_variable_assign, expr.first, nullptr}, Error());
+      return std::make_pair(new node{identifier, node_type::_variable_assign, expr.first, nullptr}, Error());
     }
 
     if (currentToken.get_value()._type == types::_id) {
@@ -308,7 +302,9 @@ public:
       auto code_block = parseCodeBlock();
       if (code_block.second.has_error()) return {new node(), code_block.second};
       
-      while (currentToken.get_name() == KEY_NEWLINE) advance();
+      // while (currentToken.get_name() == KEY_NEWLINE) advance();
+      if (currentToken.get_name() == KEY_EOF) 
+        return {new node{op_tok, node_type::_if_else, cond.first, code_block.first}, Error()};
       
       while (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_ELIF) {
         auto _elif = currentToken;
@@ -320,7 +316,9 @@ public:
         elifs.emplace_back(new node{_elif, node_type::_if_else, _cond.first, _code_block.first});
       }
 
-      while (currentToken.get_name() == KEY_NEWLINE) advance();
+      // while (currentToken.get_name() == KEY_NEWLINE) advance();
+      if (currentToken.get_name() == KEY_EOF) 
+        return {new node{op_tok, node_type::_if_else, cond.first, code_block.first, elifs}, Error()};
 
       if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_ELSE) {
         auto _else = currentToken;
@@ -329,7 +327,6 @@ public:
         if (_code_block.second.has_error()) return {new node(), _code_block.second};
         elifs.emplace_back(new node{_else, node_type::_if_else, nullptr, _code_block.first});
       }
-
       return {new node{op_tok, node_type::_if_else, cond.first, code_block.first, elifs}, Error()};
     }
     return parsePrecTop();

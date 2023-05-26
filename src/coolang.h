@@ -54,7 +54,8 @@ public:
         std::cout << interpretRes[0].get_error().to_string() << std::endl;
       } else {
         for(auto &_res : interpretRes)
-          std::cout << _res.get_value().to_string() << std::endl;
+          if (!_res.is_empty()) 
+            std::cout << _res.get_value().to_string() << std::endl;
       }
     }
 

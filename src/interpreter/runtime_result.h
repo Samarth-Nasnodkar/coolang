@@ -7,15 +7,18 @@
 class RuntimeResult {
   data value;
   Error error;
+  bool empty;
 public:
   RuntimeResult() {
     value = data();
     error = Error();
+    empty = true;
   }
 
   void reset() {
     value = data();
     error = Error();
+    empty = true;
   }
 
   data get_value() {
@@ -23,7 +26,12 @@ public:
   }
 
   void set_value(data _value) {
+    empty = false;
     value = _value;
+  }
+
+  bool is_empty() {
+    return empty;
   }
 
   Error get_error() {
@@ -31,6 +39,7 @@ public:
   }
 
   void set_error(Error _error) {
+    empty = false;
     error = _error;
   }
 
@@ -47,11 +56,13 @@ public:
 
   RuntimeResult success(data _value) {
     value = _value;
+    empty = false;
     return *this;
   }
 
   RuntimeResult failure(Error _error) {
     error = _error;
+    empty = false;
     return *this;
   }
 };

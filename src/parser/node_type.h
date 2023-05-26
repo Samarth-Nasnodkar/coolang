@@ -7,7 +7,6 @@ enum node_type {
   _unary_operator,
   _binary_operator,
   _variable_assign,
-  _variable_assign_mut,
   _variable_reassign,
   _variable_access,
   _code_block,

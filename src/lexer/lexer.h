@@ -60,6 +60,7 @@ public:
       if (currentChar == '\n') {
         while (currentChar == '\n') advance();
         tokens.emplace_back(Token(std::move(KEY_NEWLINE), currentPos, currentPos));
+        // advance();
         continue;
       }
       if (currentChar == '=' || currentChar == '!') {

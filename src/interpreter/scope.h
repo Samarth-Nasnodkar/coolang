@@ -7,7 +7,6 @@
 struct scope {
   int index;
   std::map<std::string, data> localScope;
-  std::map<std::string, bool> mutables;
 };
 
 #endif
