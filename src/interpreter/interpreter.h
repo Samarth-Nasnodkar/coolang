@@ -12,7 +12,9 @@ class Interpreter {
   scope globalScope;
 public:
   Interpreter() {
-    globalScope = {0};
+    globalScope = scope();
+    globalScope.index = 0;
+    globalScope.function = false;
     scopes.push_back(globalScope);
   }
 
@@ -96,8 +98,7 @@ public:
         auto value = visit(_node->left);
         if (value[value.size() - 1].has_error()) return value;
         // std::cout << (*_scope)->localScope.size() << std::endl;
-        data _data = scopes[itr].localScope[_node->token.get_name()];
-        data _res = type_cast(value[value.size() - 1].get_value(), _data._type);
+        data _res = value[value.size() - 1].get_value();
         scopes[itr].localScope[_node->token.get_name()] = _res;
         // std::cout << (*_scope)->localScope.size() << std::endl;
         return {RuntimeResult().success(_res)};
@@ -112,6 +113,26 @@ public:
 
         auto value = scopes[itr].localScope.find(_node->token.get_name())->second;
         return {RuntimeResult().success(value)};
+      }
+      case node_type::_function_block: {
+        scope new_scope;
+        new_scope.function = true;
+        scopes.push_back(new_scope);
+        int scopeIndex = scopes.size() - 1;
+        auto result = std::vector<RuntimeResult>();
+        for (auto child : _node->children) {
+          if (child->value == node_type::_return) {
+            auto _res = visit(child->left);
+            if (_res[_res.size() - 1].has_error()) return {RuntimeResult().failure(_res[_res.size() - 1].get_error())};
+            return {RuntimeResult().success(_res[0].get_value())};
+          }
+          auto tempRes = visit(child, scopeIndex);
+          for (auto &_r : tempRes) {
+            if (_r.has_error()) return result;
+          }
+        }
+        scopes.erase(scopes.begin() + scopeIndex);
+        return {RuntimeResult()};
       }
       case node_type::_code_block: {
         scope new_scope;
@@ -129,7 +150,7 @@ public:
         scopes.erase(scopes.begin() + scopeIndex);
         return result;
       }
-      case node_type::_if_else : {
+      case node_type::_if_else: {
         auto _cond = visit(_node->left);
         data _res = type_cast(_cond[_cond.size() - 1].get_value(), _bool);
         if (_res.value._bool) {
@@ -142,6 +163,17 @@ public:
           if (_res.value._bool) {
             return visit(elif->right);
           }
+        }
+        return {RuntimeResult()};
+      }
+      case node_type::_while_loop: {
+        auto _cond = visit(_node->left);
+        data _res = type_cast(_cond[_cond.size() - 1].get_value(), _bool);
+        while (_res.value._bool) {
+          auto _r = visit(_node->right);
+          if (_r[_r.size() - 1].has_error()) return _r;
+          _cond = visit(_node->left);
+          _res = type_cast(_cond[_cond.size() - 1].get_value(), _bool);
         }
         return {RuntimeResult()};
       }

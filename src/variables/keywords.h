@@ -22,6 +22,13 @@ const std::string KEY_CODE_BLOCK = "CODE_BLOCK";
 const std::string KEY_NEWLINE = "NEWLINE";
 const std::string KEY_EOF = "EOF";
 
+const std::string KEY_PLUS_EQUALS = "PLUS_EQUALS";
+const std::string KEY_MINUS_EQUALS = "MINUS_EQUALS";
+const std::string KEY_MUL_EQUALS = "MUL_EQUALS";
+const std::string KEY_DIV_EQUALS = "DIV_EQUALS";
+const std::string KEY_MOD_EQUALS = "MOD_EQUALS";
+const std::string KEY_POW_EQUALS = "POW_EQUALS";
+
 const std::string KEY_LE = "LE";
 const std::string KEY_LT = "LT";
 const std::string KEY_GE = "GE";
@@ -41,6 +48,8 @@ const std::string KEY_NULL = "null";
 const std::string KEY_IF = "if";
 const std::string KEY_ELSE = "else";
 const std::string KEY_ELIF = "elif";
+const std::string KEY_WHILE = "while";
+const std::string KEY_RETURN = "return";
 
 const std::string keywords[] = {
   KEY_ASSIGN,
@@ -54,6 +63,8 @@ const std::string keywords[] = {
   KEY_IF,
   KEY_ELIF,
   KEY_ELSE,
+  KEY_WHILE,
+  KEY_RETURN,
 };
 
 #endif // KEYWORDS_H

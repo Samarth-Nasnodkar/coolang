@@ -30,6 +30,8 @@ std::string node_type_to_string(node_type type) {
       return "code_block";
     case node_type::_if_else:
       return "if_else";
+    case node_type::_while_loop:
+      return "while_loop";
     default:
       return "unknown";
   }

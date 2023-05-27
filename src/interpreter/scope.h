@@ -7,6 +7,7 @@
 struct scope {
   int index;
   std::map<std::string, data> localScope;
+  bool function = false;
 };
 
 #endif

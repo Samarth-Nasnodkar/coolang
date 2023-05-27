@@ -2,6 +2,7 @@
 #include "token.h"
 #include "../variables/operators.h"
 #include "../error/error.h"
+#include "../variables/shot_hand_op.h"
 
 #ifndef LEXER_H
 #define LEXER_H
@@ -82,10 +83,13 @@ public:
       }
       int op_index = isOperator();
       if (op_index != -1) {
-        CursorPosition endPos = currentPos;
-        endPos.advance();
-        tokens.emplace_back(Token(std::move(operators[op_index].name), currentPos, endPos));
+        CursorPosition startPos = currentPos;
         advance();
+        bool _short_hand = currentChar == '=' && operators[op_index].binary;
+        if (_short_hand) 
+          advance();
+        CursorPosition endPos = currentPos;
+        tokens.emplace_back(Token(std::move(_short_hand ? short_hand_ops[op_index].name : operators[op_index].name), startPos, endPos));
         continue;
       }
       if (isNumber()) {

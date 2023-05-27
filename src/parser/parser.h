@@ -38,14 +38,20 @@ PREC_6 : PREC_5 AND PREC_5
 PREC_7 : PREC_6 OR PREC_6
        : PREC_6
 
-PREC_TOP : let IDENTIFIER EQ PREC_5
-         : PREC_5
+PREC_8   : let IDENTIFIER EQ PREC_7
+         : PREC_7
+
+PREC_9 : return PREC_8
+       : PREC_8
 
 PREC_IF : if PREC_TOP CODE_BLOCK else (if PREC_TOP) CODE_BLOCK
         : PREC_TOP
 
-code_block : { PREC_IF ... }
-           : PREC_IF EOL | EOF
+PREC_WHILE : while condition CODE_BLOCK
+           : PREC_IF
+
+code_block : { PREC_WHILE ... }
+           : PREC_WHILE EOL | EOF
 */
 
 #ifndef PARSER_H
@@ -91,6 +97,15 @@ public:
       }
     }
     return false;
+  }
+
+  int isShortHand() {
+    for(int i = 0; i < sizeof(short_hand_ops) / sizeof(short_hand_ops[0]); ++i) {
+      if (short_hand_ops[i].name == currentToken.get_name())
+        return i;
+    }
+
+    return -1;
   }
 
   std::pair<std::vector<node *>, Error> parse() {
@@ -250,7 +265,7 @@ public:
     return prec4;
   }
 
-  std::pair<node *, Error> parsePrecTop() {
+  std::pair<node *, Error> parsePrec8() {
     if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_ASSIGN) {
       advance();
       if (currentToken.get_value()._type != types::_id) {
@@ -275,6 +290,29 @@ public:
     if (currentToken.get_value()._type == types::_id) {
       auto identifier = currentToken;
       advance();
+      int shortHand = isShortHand();
+      if (shortHand != -1) {
+        advance();
+        auto expr = parsePrec7();
+        if (expr.second.has_error()) return {new node(), expr.second};
+        return {
+          new node{
+            identifier,
+            node_type::_variable_reassign,
+            new node{
+              Token(short_hand_ops[shortHand].binary_op_name, CursorPosition(), CursorPosition()),
+              node_type::_binary_operator,
+              new node{
+                identifier,
+                node_type::_variable_access,
+              },
+              expr.first
+            },
+            nullptr
+          },
+          Error()
+        };
+      }
       if (currentToken.get_name() != KEY_EQ) {
         reverse();
         return parsePrec7();
@@ -292,12 +330,24 @@ public:
     return parsePrec7();  
   }
 
+  std::pair<node *, Error> parsePrec9() {
+    if (currentToken.get_name() == KEY_RETURN) {
+      auto op_tok = currentToken;
+      advance();
+      auto expr = parsePrec8();
+      if (expr.second.has_error()) return {new node(), expr.second};
+      return {new node{op_tok, node_type::_return, expr.first}, Error()};
+    }
+
+    return parsePrec8();
+  }
+
   std::pair<node *, Error> parsePrecIf() {
     if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_IF) {
       auto op_tok = currentToken;
       advance();
       std::vector<node *> elifs;
-      auto cond = parsePrecTop();
+      auto cond = parsePrec9();
       if (cond.second.has_error()) return {new node(), cond.second};
       auto code_block = parseCodeBlock();
       if (code_block.second.has_error()) return {new node(), code_block.second};
@@ -309,7 +359,7 @@ public:
       while (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_ELIF) {
         auto _elif = currentToken;
         advance();
-        auto _cond = parsePrecTop();
+        auto _cond = parsePrec9();
         if (_cond.second.has_error()) return {new node(), _cond.second};
         auto _code_block = parseCodeBlock();
         if (_code_block.second.has_error()) return {new node(), _code_block.second};
@@ -329,7 +379,21 @@ public:
       }
       return {new node{op_tok, node_type::_if_else, cond.first, code_block.first, elifs}, Error()};
     }
-    return parsePrecTop();
+    return parsePrec9();
+  }
+
+  std::pair<node *, Error> parsePrecWhile() {
+    if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_WHILE) {
+      auto op_tok = currentToken;
+      advance();
+      auto cond = parsePrec9();
+      if (cond.second.has_error()) return {new node(), cond.second};
+      auto code_block = parseCodeBlock();
+      if (code_block.second.has_error()) return {new node(), code_block.second};
+      return {new node{op_tok, node_type::_while_loop, cond.first, code_block.first}, Error()};
+    }
+
+    return parsePrecIf();
   }
 
   std::pair<node *, Error> parseCodeBlock() {
@@ -347,7 +411,7 @@ public:
           nodes.push_back(code_block.first);
           continue;
         }
-        auto expr = parsePrecIf();
+        auto expr = parsePrecWhile();
         if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
         nodes.push_back(expr.first);
       }
@@ -355,7 +419,16 @@ public:
       return std::make_pair(new node{Token(KEY_CODE_BLOCK, CursorPosition(), CursorPosition()), node_type::_code_block, nullptr, nullptr, nodes}, Error());
     }
 
-    return parsePrecIf();
+    return parsePrecWhile();
+  }
+
+  std::pair<node *, Error> parseFunctionBlock() {
+    auto code_block = parseCodeBlock();
+    if (code_block.second.has_error()) return {new node(), code_block.second};
+    if (code_block.first->value == node_type::_code_block)
+      code_block.first->value = node_type::_function_block;
+    
+    return code_block;
   }
 };
 

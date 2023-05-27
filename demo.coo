@@ -1,5 +1,12 @@
-let a = 50
-a = 0
-if not a {
-  let b = 10
+let a = 1
+let b = 1
+let n = 10
+
+while n != 0 {
+  let c = a + b
+  a = b
+  b = c
+  n -= 1
 }
+
+b

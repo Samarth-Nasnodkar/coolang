@@ -10,7 +10,10 @@ enum node_type {
   _variable_reassign,
   _variable_access,
   _code_block,
+  _function_block,
   _if_else,
+  _while_loop,
+  _return,
   _nullnode
 };
 
