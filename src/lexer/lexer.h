@@ -64,6 +64,17 @@ public:
         // advance();
         continue;
       }
+
+      if (currentChar == '\'' || currentChar == '"') {
+        auto res = makeString();
+        if (!res.has_data() && res.get_name().length() == 0) {
+          tokens.clear();
+          return {tokens, Error("Invalid Syntax Error", "Expected '\"'")};
+        }
+        tokens.emplace_back(res);
+        continue;
+      }
+
       if (currentChar == '=' || currentChar == '!') {
         auto res = makeEq();
         if (!res.has_data() && res.get_name().length() == 0) {
@@ -109,6 +120,22 @@ public:
     CursorPosition endPos = currentPos;
     tokens.emplace_back(Token(KEY_EOF, currentPos, endPos));
     return std::make_pair(tokens, Error());
+  }
+
+  Token makeString() {
+    CursorPosition startpos = currentPos;
+    char startQuote = currentChar;
+    advance();
+    std::string _str;
+    while (currentChar != startQuote) {
+      _str += currentChar;
+      advance();
+    }
+    type_value v;
+    v._string = new char[sizeof(_str.c_str()) + 1];
+    strncpy(v._string, _str.c_str(), sizeof(_str.c_str()));
+    advance();
+    return {KEY_STRING, {types::_string, v}, startpos, currentPos};
   }
 
   Token makeLTE() {

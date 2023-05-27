@@ -27,6 +27,9 @@ struct data {
     else if (_type == types::_bool) {
       _repr += value._bool ? "true" : "false";
     }
+    else if (_type == types::_string) {
+      _repr += value._string;
+    }
     else
       _repr += "null";
     

@@ -8,4 +8,5 @@
 #include<string>
 
 #include <math.h>
+#include <string.h>
 #endif

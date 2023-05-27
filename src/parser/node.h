@@ -16,6 +16,8 @@ std::string node_type_to_string(node_type type) {
   switch (type) {
     case node_type::_number:
       return "number";
+    case node_type::_str:
+      return "str";
     case node_type::_unary_operator:
       return "unary_operator";
     case node_type::_binary_operator:
@@ -39,26 +41,26 @@ std::string node_type_to_string(node_type type) {
 
 void printNode(node *node) {
   if (node == nullptr) return;
-  if (node->value == node_type::_number) {
+  if (node->value == node_type::_number || node->value == node_type::_str || node->value == node_type::_boolean) {
     std::cout << node->token.get_value().to_string() << "(" << node_type_to_string(node->value) << ") ";
   }
   else if (node->value == node_type::_unary_operator) {
-    std::cout << node->token.get_name() << "(" << node_type_to_string(node->value) << ") ";
+    std::cout << node->token.to_string() << "(" << node_type_to_string(node->value) << ") ";
     printNode(node->right);
   }
   else if (node->value == node_type::_binary_operator) {
     std::cout << "(";
     printNode(node->left);
-    std::cout << " " << node->token.get_name() << "(" << node_type_to_string(node->value) << ") ";
+    std::cout << " " << node->token.to_string() << "(" << node_type_to_string(node->value) << ") ";
     printNode(node->right);
     std::cout << ")";
   } 
   else if (node->value == node_type::_variable_assign) {
-    std::cout << node->token.get_name() << "(" << node_type_to_string(node->value) << ") = ";
+    std::cout << node->token.to_string() << "(" << node_type_to_string(node->value) << ") = ";
     printNode(node->left);
   }
   else if (node->value == node_type::_variable_access) {
-    std::cout << node->token.get_name() << "(" << node_type_to_string(node->value) << ") ";
+    std::cout << node->token.to_string() << "(" << node_type_to_string(node->value) << ") ";
   }
   else if (node->value == node_type::_code_block) {
     std::cout << "code_block(" << node_type_to_string(node->value) << ") ";

@@ -6,7 +6,7 @@
 #include "node.h"
 
 /*
-atom : INT | FLOAT | IDENTIFIER
+atom : INT | FLOAT | STR | IDENTIFIER
      : LPAREN PREC_5 RPAREN
 
 PREC_0 : atom POW atom
@@ -134,6 +134,12 @@ public:
 
     if (currentToken.get_value()._type == types::_bool) {
       node *_node = new node{currentToken, node_type::_boolean, nullptr, nullptr};
+      advance();
+      return std::make_pair(_node, Error());
+    }
+
+    if (currentToken.get_value()._type == types::_string) {
+      node *_node = new node{currentToken, node_type::_str, nullptr, nullptr};
       advance();
       return std::make_pair(_node, Error());
     }

@@ -49,7 +49,12 @@ public:
     std::string _repr;
     _repr += "(" + name;
     if (has_data()) {
-      _repr += ": " + value.to_string() + ")";
+      if (value._type == _string) {
+        std::string _r = value.value._string;
+        _repr += ": \"" + _r + "\")";
+      } else {
+        _repr += ": " + value.to_string() + ")";
+      }
     } else {
       _repr += ")";
     }

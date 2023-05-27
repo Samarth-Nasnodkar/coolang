@@ -4,6 +4,7 @@
 enum node_type {
   _number,
   _boolean,
+  _str,
   _unary_operator,
   _binary_operator,
   _variable_assign,

@@ -5,6 +5,7 @@
 
 const std::string KEY_FLOAT = "FLOAT";
 const std::string KEY_INT = "INT";
+const std::string KEY_STRING = "STRING";
 
 
 const std::string KEY_ADD = "ADD";

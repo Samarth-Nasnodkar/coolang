@@ -27,6 +27,9 @@ public:
       case node_type::_boolean: {
         return {RuntimeResult().success(_node->token.get_value())};
       }
+      case node_type::_str: {
+        return {RuntimeResult().success(_node->token.get_value())};
+      }
       case node_type::_nullnode: {
         return {RuntimeResult().success(_node->token.get_value())};
       }

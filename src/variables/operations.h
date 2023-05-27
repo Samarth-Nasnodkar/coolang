@@ -1,3 +1,4 @@
+#include "../includes.h"
 #include "operators.h"
 #include "data.h"
 
@@ -201,6 +202,22 @@ data logic_or(data a, data b) {
 
 data le(data a, data b) {
   type_value res;
+  if (a._type == types::_string) {
+    if (b._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) <= 0;
+    return data(types::_bool, res);
+  }
+  if (b._type == types::_string) {
+    if (a._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) <= 0;
+    return data(types::_bool, res);
+  }
   if (asInt(a) && asInt(b)) {
     res._bool = a.value._int <= b.value._int;
     return data(types::_bool, res);
@@ -220,6 +237,22 @@ data le(data a, data b) {
 
 data lt(data a, data b) {
   type_value res;
+  if (a._type == types::_string) {
+    if (b._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) < 0;
+    return data(types::_bool, res);
+  }
+  if (b._type == types::_string) {
+    if (a._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) < 0;
+    return data(types::_bool, res);
+  }
   if (asInt(a) && asInt(b)) {
     res._bool = a.value._int < b.value._int;
     return data(types::_bool, res);
@@ -239,6 +272,22 @@ data lt(data a, data b) {
 
 data ge(data a, data b) {
   type_value res;
+  if (a._type == types::_string) {
+    if (b._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) >= 0;
+    return data(types::_bool, res);
+  }
+  if (b._type == types::_string) {
+    if (a._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) >= 0;
+    return data(types::_bool, res);
+  }
   if (asInt(a) && asInt(b)) {
     res._bool = a.value._int > b.value._int;
     return data(types::_bool, res);
@@ -258,6 +307,22 @@ data ge(data a, data b) {
 
 data gt(data a, data b) {
   type_value res;
+  if (a._type == types::_string) {
+    if (b._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) > 0;
+    return data(types::_bool, res);
+  }
+  if (b._type == types::_string) {
+    if (a._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) > 0;
+    return data(types::_bool, res);
+  }
   if (asInt(a) && asInt(b)) {
     res._bool = a.value._int > b.value._int;
     return data(types::_bool, res);
@@ -277,6 +342,22 @@ data gt(data a, data b) {
 
 data ee(data a, data b) {
   type_value res;
+  if (a._type == types::_string) {
+    if (b._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) == 0;
+    return data(types::_bool, res);
+  }
+  if (b._type == types::_string) {
+    if (a._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) == 0;
+    return data(types::_bool, res);
+  }
   if (asInt(a) && asInt(b)) {
     res._bool = a.value._int == b.value._int;
     return data(types::_bool, res);
@@ -296,6 +377,22 @@ data ee(data a, data b) {
 
 data ne(data a, data b) {
   type_value res;
+  if (a._type == types::_string) {
+    if (b._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) != 0;
+    return data(types::_bool, res);
+  }
+  if (b._type == types::_string) {
+    if (a._type != types::_string) {
+      res._bool = false;
+      return data(types::_bool, res);
+    }
+    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) != 0;
+    return data(types::_bool, res);
+  }
   if (asInt(a) && asInt(b)) {
     res._bool = a.value._int != b.value._int;
     return data(types::_bool, res);
