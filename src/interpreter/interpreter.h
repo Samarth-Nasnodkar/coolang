@@ -18,6 +18,28 @@ public:
     scopes.push_back(globalScope);
   }
 
+  bool registerFunction(int scopeIndex, std::string function_name, node **function_node) {
+    if (scopes[scopeIndex].localScope.find(function_name) != scopes[scopeIndex].localScope.end()) return false;
+    scopes[scopeIndex].functionScope[function_name] = *function_node;
+    return true;
+  } 
+
+  bool registerVariable(int scopeIndex, std::string variable_name, data val) {
+    if (scopes[scopeIndex].localScope.find(variable_name) != scopes[scopeIndex].localScope.end()) return false;
+    scopes[scopeIndex].localScope[variable_name] = val;
+    return true;
+  }
+
+  node *isRegisteredFunc(int scopeIndex, std::string function_name) {
+    while (scopeIndex >= 0) {
+      if (scopes[scopeIndex].functionScope.find(function_name) != scopes[scopeIndex].functionScope.end()) {
+        return scopes[scopeIndex].functionScope[function_name];
+      }
+      scopeIndex--;
+    }
+    return nullptr;
+  }
+
   std::vector<RuntimeResult> visit(node *_node, int scopeIndex = -1) {
     if (scopeIndex == -1) scopeIndex = scopes.size() - 1;
     switch (_node->value) {
@@ -118,10 +140,6 @@ public:
         return {RuntimeResult().success(value)};
       }
       case node_type::_function_block: {
-        scope new_scope;
-        new_scope.function = true;
-        scopes.push_back(new_scope);
-        int scopeIndex = scopes.size() - 1;
         auto result = std::vector<RuntimeResult>();
         for (auto child : _node->children) {
           if (child->value == node_type::_return) {
@@ -129,13 +147,14 @@ public:
             if (_res[_res.size() - 1].has_error()) return {RuntimeResult().failure(_res[_res.size() - 1].get_error())};
             return {RuntimeResult().success(_res[0].get_value())};
           }
-          auto tempRes = visit(child, scopeIndex);
+          auto tempRes = visit(child);
           for (auto &_r : tempRes) {
             if (_r.has_error()) return result;
           }
         }
-        scopes.erase(scopes.begin() + scopeIndex);
-        return {RuntimeResult()};
+        type_value v;
+        v._int = 0;
+        return {RuntimeResult().success(data(types::_null, v))};
       }
       case node_type::_code_block: {
         scope new_scope;
@@ -180,8 +199,34 @@ public:
         }
         return {RuntimeResult()};
       }
+      case node_type::_function_definition: {
+        bool _r = registerFunction(scopeIndex, _node->token.get_name(), &_node);
+        if (!_r) return {RuntimeResult().failure(Error("Name Error", "Function is already defined"))};
+        return {RuntimeResult()};
+      }
+      case node_type::_function_call: {
+        node *_func = isRegisteredFunc(scopeIndex, _node->token.get_name());
+        if (_func == nullptr) {
+          return {RuntimeResult().failure(Error("Name Error", "Function is not defined"))};
+        }
+        if (_func->args.size() != _node->children.size()) {
+          return {RuntimeResult().failure(Error("Name Error", "Function arguments are not matching"))};
+        }
+        scope new_scope;
+        scopes.push_back(new_scope);
+        int scopeIndex = scopes.size() - 1;
+        for(int i = 0; i < _func->args.size(); i++) {
+          auto _res = visit(_node->children[i], scopeIndex);
+          if (_res[_res.size() - 1].has_error()) return _res;
+          scopes[scopeIndex].localScope[_func->args[i].get_name()] = _res[_res.size() - 1].get_value();
+        }
+        auto _res = visit(_func->left, scopeIndex);
+        if (_res[_res.size() - 1].has_error()) return _res;
+        scopes.erase(scopes.begin() + scopeIndex);
+        return _res;
+      }
       default: {
-        return {RuntimeResult().failure(Error("Invalid Syntax Error", "Expected Number"))};
+        return {RuntimeResult().failure(Error("Unknown Error", "Unexpected Node"))};
       }
     }
   }

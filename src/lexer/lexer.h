@@ -43,11 +43,11 @@ public:
   }
 
   bool isAlpha() {
-    return (currentChar >= 65 && currentChar <= 90) || (currentChar >= 97 && currentChar <= 122);
+    return (currentChar >= 65 && currentChar <= 90) || (currentChar >= 97 && currentChar <= 122) || (currentChar == '_');
   }
 
   bool isAlphaNumeric() {
-    return isAlpha() || isNumber();
+    return isAlpha() || isNumber() || currentChar == '_';
   }
 
   std::pair<std::vector<Token>, Error> run() {
@@ -62,6 +62,12 @@ public:
         while (currentChar == '\n') advance();
         tokens.emplace_back(Token(std::move(KEY_NEWLINE), currentPos, currentPos));
         // advance();
+        continue;
+      }
+
+      if (currentChar == ',') {
+        tokens.emplace_back(Token(std::move(SEP_COMMA), currentPos, currentPos));
+        advance();
         continue;
       }
 

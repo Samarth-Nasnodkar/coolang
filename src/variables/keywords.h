@@ -50,7 +50,10 @@ const std::string KEY_IF = "if";
 const std::string KEY_ELSE = "else";
 const std::string KEY_ELIF = "elif";
 const std::string KEY_WHILE = "while";
+const std::string KEY_FUNCTION = "fn";
 const std::string KEY_RETURN = "return";
+
+const std::string SEP_COMMA = "COMMA";
 
 const std::string keywords[] = {
   KEY_ASSIGN,
@@ -65,6 +68,7 @@ const std::string keywords[] = {
   KEY_ELIF,
   KEY_ELSE,
   KEY_WHILE,
+  KEY_FUNCTION,
   KEY_RETURN,
 };
 

@@ -1,1 +1,8 @@
-let a = 'hello' + 'world'
+fn demo(a) {
+  fn _some(a) {
+    return a + 10
+  }
+  return _some(a)
+}
+
+demo(10 + 20) + 10

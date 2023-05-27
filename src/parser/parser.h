@@ -9,8 +9,11 @@
 atom : INT | FLOAT | STR | IDENTIFIER
      : LPAREN PREC_5 RPAREN
 
-PREC_0 : atom POW atom
-       : atom
+FUNCTION_CALL : FUNC_CALL
+              : atom
+
+PREC_0 : FUNCTION_CALL POW FUNCTION_CALL
+       : FUNCTION_CALL
 
 PREC_1 : PREC_0
        : PLUS PREC_1
@@ -50,8 +53,12 @@ PREC_IF : if PREC_TOP CODE_BLOCK else (if PREC_TOP) CODE_BLOCK
 PREC_WHILE : while condition CODE_BLOCK
            : PREC_IF
 
-code_block : { PREC_WHILE ... }
-           : PREC_WHILE EOL | EOF
+PREC_FUNCTION : FUNCTION IDENTIFIER LPAREN IDENTIFIER RPAREN FUNCTION_BLOCK
+              : FUNCTION IDENTIFIER LPAREN RPAREN FUNCTION_BLOCK
+              : PREC_WHILE
+
+code_block : { PREC_FUNCTION ... }
+           : PREC_FUNCTION EOL | EOF
 */
 
 #ifndef PARSER_H
@@ -146,7 +153,7 @@ public:
 
     if (currentToken.get_name() == KEY_LPAREN) {
       advance();
-      auto expr = parsePrec5();
+      auto expr = parsePrec8();
       if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
       if (currentToken.get_name() != KEY_RPAREN) {
         return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected ')'"));
@@ -163,14 +170,38 @@ public:
 
     return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Number"));
   }
+  
+  std::pair<node *, Error> parseFunctionCall() {
+    if (currentToken.get_value()._type == types::_id) {
+      auto identifier = currentToken;
+      advance();
+      if (currentToken.get_name() != KEY_LPAREN) {
+        reverse();
+        return parseAtom();
+      }
+      advance();
+      std::vector<node *> args;
+      while (currentToken.get_name() != KEY_RPAREN) {
+        auto arg = parsePrec7();
+        if (arg.second.has_error()) return std::make_pair(new node(), arg.second);
+        args.push_back(arg.first);
+        if (currentToken.get_name() == SEP_COMMA) {
+          advance();
+        }
+      }
+      advance();
+      return std::make_pair(new node{identifier, node_type::_function_call, .children = args}, Error());
+    }
+    return parseAtom();
+  }
 
   std::pair<node *, Error> parsePrec0() {
-    auto left = parseAtom();
+    auto left = parseFunctionCall();
     if (left.second.has_error()) return std::make_pair(new node(), left.second);
     if (currentToken.get_name() == KEY_POW) {
       auto op = currentToken;
       advance();
-      auto right = parseAtom();
+      auto right = parseFunctionCall();
       if (right.second.has_error()) return std::make_pair(new node(), right.second);
       return std::make_pair(new node{op, node_type::_binary_operator, left.first, right.first}, Error());
     }
@@ -402,6 +433,41 @@ public:
     return parsePrecIf();
   }
 
+  std::pair<node *, Error> parsePrecFunction() {
+    if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_FUNCTION) {
+      advance();
+      if (currentToken.get_value()._type != types::_id) {
+        return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected identifier"));
+      }
+
+      auto identifier = currentToken;
+      advance();
+      if (currentToken.get_name() != KEY_LPAREN) {
+        return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected '('"));
+      }
+      
+      advance();
+      std::vector<Token> args;
+      while (currentToken.get_name() != KEY_RPAREN) {
+        if (currentToken.get_value()._type != types::_id) {
+          return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected identifier"));
+        }
+        args.push_back(currentToken);
+        advance();
+        if (currentToken.get_name() == SEP_COMMA) {
+          advance();
+          continue;
+        }
+      }
+      advance();
+      auto code_block = parseFunctionBlock();
+      if (code_block.second.has_error()) return std::make_pair(new node(), code_block.second);
+      return std::make_pair(new node{identifier, node_type::_function_definition, code_block.first, .args = args}, Error());
+    }
+
+    return parsePrecWhile();
+  }
+
   std::pair<node *, Error> parseCodeBlock() {
     if (currentToken.get_name() == KEY_LBRACE) {
       advance();
@@ -417,7 +483,7 @@ public:
           nodes.push_back(code_block.first);
           continue;
         }
-        auto expr = parsePrecWhile();
+        auto expr = parsePrecFunction();
         if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
         nodes.push_back(expr.first);
       }
@@ -425,7 +491,7 @@ public:
       return std::make_pair(new node{Token(KEY_CODE_BLOCK, CursorPosition(), CursorPosition()), node_type::_code_block, nullptr, nullptr, nodes}, Error());
     }
 
-    return parsePrecWhile();
+    return parsePrecFunction();
   }
 
   std::pair<node *, Error> parseFunctionBlock() {

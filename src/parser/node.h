@@ -10,6 +10,7 @@ struct node {
   node *left;
   node *right;
   std::vector<node *> children;
+  std::vector<Token> args;
 };
 
 std::string node_type_to_string(node_type type) {
@@ -30,10 +31,16 @@ std::string node_type_to_string(node_type type) {
       return "variable_access";
     case node_type::_code_block:
       return "code_block";
+    case node_type::_function_block:
+      return "function_block";
     case node_type::_if_else:
       return "if_else";
     case node_type::_while_loop:
       return "while_loop";
+    case node_type::_function_definition:
+      return "function_definition";
+    case node_type::_function_call:
+      return "function_call";
     default:
       return "unknown";
   }

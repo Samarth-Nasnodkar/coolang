@@ -4,7 +4,6 @@
 enum types {
   _int,
   _float,
-  _char,
   _string,
   _keyword,
   _id,
