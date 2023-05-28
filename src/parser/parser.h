@@ -330,7 +330,8 @@ public:
   }
 
   std::pair<node *, Error> parsePrec8() {
-    if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_ASSIGN) {
+    if (currentToken.get_value()._type == types::_keyword && (currentToken.get_name() == KEY_ASSIGN || currentToken.get_name() == KEY_ASSIGN_CONST)) {
+      bool isConst = currentToken.get_name() == KEY_ASSIGN_CONST;
       advance();
       if (currentToken.get_value()._type != types::_id) {
         return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected Identifier"));
@@ -348,7 +349,7 @@ public:
       //   return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected new line"));
       // }
 
-      return std::make_pair(new node{identifier, node_type::_variable_assign, expr.first, nullptr}, Error());
+      return std::make_pair(new node{identifier, node_type::_variable_assign, expr.first, .isConst = isConst}, Error());
     }
 
     if (currentToken.get_value()._type == types::_id) {

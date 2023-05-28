@@ -44,7 +44,7 @@ const std::string KEY_AND = "and";
 const std::string KEY_OR = "or";
 
 const std::string KEY_ASSIGN = "let";
-const std::string KEY_MUT = "mut";
+const std::string KEY_ASSIGN_CONST = "const";
 const std::string KEY_TRUE = "true";
 const std::string KEY_FALSE = "false";
 const std::string KEY_NULL = "null";
@@ -59,7 +59,7 @@ const std::string SEP_COMMA = "COMMA";
 
 const std::string keywords[] = {
   KEY_ASSIGN,
-  KEY_MUT,
+  KEY_ASSIGN_CONST,
   KEY_TRUE,
   KEY_FALSE,
   KEY_NULL,

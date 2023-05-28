@@ -31,6 +31,14 @@ public:
     return value;
   }
 
+  bool isConst() {
+    return value.isConst;
+  }
+
+  void setConst(bool _const) {
+    value.isConst = _const;
+  }
+
   void set_value(data _value) {
     empty = false;
     value = _value;

@@ -6,14 +6,17 @@
 
 struct  data {
   types _type;
+  bool isConst;
   type_value value;
 
   data() {
+    isConst = false;
     _type = types::_null;
     value = type_value();
   }
 
   data(types __type, type_value _value) {
+    isConst = false;
     _type = __type;
     value = _value;
   }

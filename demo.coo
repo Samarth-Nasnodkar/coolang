@@ -7,7 +7,7 @@ fn fibonacci(n) {
 }
 
 let a = 1
-let arr = []
+const arr = []
 
 print(arr)
 

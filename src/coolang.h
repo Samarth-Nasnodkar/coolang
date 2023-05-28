@@ -52,6 +52,7 @@ public:
       auto interpretRes = interpreter.visit(node);
       if (interpretRes.get_error().has_error()) {
         std::cout << interpretRes.get_error().to_string() << std::endl;
+        break;
       } 
       // else {
       //     if (!interpretRes.is_empty()) 

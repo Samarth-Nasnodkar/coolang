@@ -11,6 +11,7 @@ struct node {
   node *right;
   std::vector<node *> children;
   std::vector<Token> args;
+  bool isConst;
 };
 
 std::string node_type_to_string(node_type type) {

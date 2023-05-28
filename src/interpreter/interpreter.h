@@ -227,6 +227,7 @@ public:
         }
         auto value = visit(_node->left);
         if (value.has_error()) return value;
+        value.setConst(_node->isConst);
         // std::cout << (*_scope)->localScope.size() << std::endl;
         scopes[scopeIndex].localScope[_node->token.get_name()] = value.get_value();
         // std::cout << (*_scope)->localScope.size() << std::endl;
@@ -239,6 +240,10 @@ public:
         }
         if (itr == -1) {
           return RuntimeResult().failure(Error("Name Error", "Unidentified token '" + _node->token.get_name() + "'"));
+        }
+        auto currValue = scopes[itr].localScope[_node->token.get_name()];
+        if (currValue.isConst) {
+          return RuntimeResult().failure(Error("Name Error", "Cannot reassign constant variable " + _node->token.get_name()));
         }
         auto value = visit(_node->left);
         if (value.has_error()) return value;
