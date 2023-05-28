@@ -2,6 +2,6 @@
 #include "src/coolang.h"
 
 int main(int argc, char **argv) {
-  Coolang().run(argv[1]);
+  Coolang().run(argc > 1 ? argv[1] : "demo.coo");
   return 0;
 }

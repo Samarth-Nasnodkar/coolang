@@ -41,6 +41,8 @@ std::string node_type_to_string(node_type type) {
       return "function_definition";
     case node_type::_function_call:
       return "function_call";
+    case node_type::_return:
+      return "return";
     default:
       return "unknown";
   }

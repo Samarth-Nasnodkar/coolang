@@ -9,10 +9,12 @@ class RuntimeResult {
   Error error;
   bool empty;
 public:
+  bool is_return;
   RuntimeResult() {
     value = data();
     error = Error();
     empty = true;
+    is_return = false;
   }
 
   void reset() {

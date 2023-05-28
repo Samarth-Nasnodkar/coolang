@@ -497,8 +497,9 @@ public:
   std::pair<node *, Error> parseFunctionBlock() {
     auto code_block = parseCodeBlock();
     if (code_block.second.has_error()) return {new node(), code_block.second};
-    if (code_block.first->value == node_type::_code_block)
+    if (code_block.first->value == node_type::_code_block) {
       code_block.first->value = node_type::_function_block;
+    }
     
     return code_block;
   }
