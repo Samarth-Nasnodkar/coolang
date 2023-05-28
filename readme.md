@@ -1,5 +1,12 @@
 # README
 
+## How to run
+1. Clone the Repo
+2. Change directory into it
+3. Create a `.coo` (or any extension works tbh)
+4. use the command `./run.sh  <filename>`
+5. Thanks for using!!
+
 # About
 
 This is Coolang!!, my hobby project. I always dreamt of making my own programming language, so this is it, how I wanted a programming language to be.  
@@ -14,14 +21,18 @@ A number is a 32 bit integer or floating point. I'm still conflicted whether to 
 ### boolean
 A boolean is a 8 bit bool same as C/C++
 
-## str
+### str
 A string can be declared using single `'` or double `"` quotes. As you please! we don't restrict you
+
+### list
+Lists here are very similar to python, flexible in length and can hold any data type.
 
 ## Variable Declaration
 Variables can start with any character from the alphabet or an `_` but not any numeric character.  
 Variables can be declared using the `let` keyword followed by the identifier
 ```
 let a = 10
+let arr = [0] * 10
 ```
 ### And lines don't end with semi-colons!!!
 
