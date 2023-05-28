@@ -6,7 +6,7 @@
 #include "node.h"
 
 /*
-atom : INT | FLOAT | STR | IDENTIFIER
+atom : INT | FLOAT | STR | LIST | IDENTIFIER
      : LPAREN PREC_5 RPAREN
 
 FUNCTION_CALL : FUNC_CALL
@@ -127,7 +127,21 @@ public:
   }
 
   std::pair<node *, Error> parseAtom() {
-    // std::cout << currentToken.to_string() << std::endl;
+    if (currentToken.get_name() == KEY_LBRACKET) {
+      std::vector<node *> elements;
+      advance();
+      while (currentToken.get_name() != KEY_RBRACKET) {
+        auto _res = parsePrec8();
+        if (_res.second.has_error()) return std::make_pair(new node(), _res.second);
+        elements.emplace_back(_res.first);
+
+        if (currentToken.get_name() == SEP_COMMA)
+          advance();
+      }
+      advance();
+      return {new node{currentToken, node_type::_list, .children = elements}, Error()};
+    }
+
     if (currentToken.get_value()._type == types::_null && currentToken.has_data()) {
       node *_node = new node{currentToken, node_type::_nullnode, nullptr, nullptr};
       advance();

@@ -1,0 +1,18 @@
+fn fibonacci(n) {
+  if n <= 2 {
+    return n - 1
+  }
+
+  return fibonacci(n - 1) + fibonacci(n - 2)
+}
+
+let a = 1
+let arr = []
+
+print(arr)
+
+while a < 10 {
+  arr += fibonacci(a)
+  a += 1
+}
+print(arr)

@@ -93,6 +93,18 @@ public:
       case node_type::_str: {
         return RuntimeResult().success(_node->token.get_value());
       }
+      case node_type::_list: {
+        data *r = new data[_node->children.size()];
+        for(int i = 0; i < _node->children.size(); i++) {
+          auto _res = visit(_node->children[i]);
+          if (_res.has_error()) return _res;
+          r[i] = _res.get_value();
+        }
+        type_value v;
+        int len = _node->children.size();
+        v._list = new _llist{r, len};
+        return RuntimeResult().success(data(types::_list_type, v));
+      }
       case node_type::_nullnode: {
         return RuntimeResult().success(_node->token.get_value());
       }

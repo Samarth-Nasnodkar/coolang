@@ -5,6 +5,7 @@
 #include "int_ops/int_ops.h"
 #include "float_ops/float_ops.h"
 #include "str_ops/str_ops.h"
+#include "list_ops/list_ops.h"
 
 #ifndef OPERATIONS_H
 #define OPERATIONS_H
@@ -30,6 +31,8 @@ std::pair<data, Error> add(data a, data b) {
     return float_add(a, b);
   } else if (a._type == types::_string) {
     return str_add(a, b);
+  } else if (a._type == types::_list_type) {
+    return list_add(a, b);
   } else {
     return {data(), Error("Invalid operands", "Invalid operands for '+'")};
   }
@@ -43,6 +46,8 @@ std::pair<data, Error> sub(data a, data b) {
     return float_sub(a, b);
   } else if (a._type == types::_string) {
     return str_sub(a, b);
+  } else if (a._type == types::_list_type) {
+    return list_sub(a, b);
   } else {
     return {data(), Error("Invalid operands", "Invalid operands for '-'")};
   }
@@ -56,6 +61,8 @@ std::pair<data, Error> mul(data a, data b) {
     return float_mul(a, b);
   } else if (a._type == types::_string) {
     return str_mul(a, b);
+  } else if (a._type == types::_list_type) {
+    return list_mul(a, b);
   } else {
     return {data(), Error("Invalid operands", "Invalid operands for '*'")};
   }
@@ -69,6 +76,8 @@ std::pair<data, Error> div(data a, data b) {
     return float_div(a, b);
   } else if (a._type == types::_string) {
     return str_div(a, b);
+  } else if (a._type == types::_list_type) {
+    return list_div(a, b);
   } else {
     return {data(), Error("Invalid operands", "Invalid operands for '/'")};
   }
@@ -82,6 +91,8 @@ std::pair<data, Error> mod(data a, data b) {
     return float_mod(a, b);
   } else if (a._type == types::_string) {
     return str_mod(a, b);
+  } else if (a._type == types::_list_type) {
+    return list_mul(a, b);
   } else {
     return {data(), Error("Invalid operands", "Invalid operands for '%'")};
   }
@@ -95,6 +106,8 @@ std::pair<data, Error> pow(data a, data b) {
     return float_pow(a, b);
   } else if (a._type == types::_string) {
     return str_pow(a, b);
+  } else if (a._type == types::_list_type) {
+    return list_pow(a, b);
   } else {
     return {data(), Error("Invalid operands", "Invalid operands for '^'")};
   }
@@ -185,6 +198,9 @@ std::pair<data, Error> le(data a, data b) {
     if (r.second.has_error()) return {data(), r.second};
     res._bool = r.first.value._int <= 0;
   }
+  else if (a._type == types::_list_type) {
+    return list_cmp(a, b);
+  } 
   return {data(types::_bool, res), Error()};
 }
 
@@ -205,6 +221,9 @@ std::pair<data, Error> lt(data a, data b) {
     if (r.second.has_error()) return {data(), r.second};
     res._bool = r.first.value._int < 0;
   }
+  else if (a._type == types::_list_type) {
+    return list_cmp(a, b);
+  } 
   return {data(types::_bool, res), Error()};
 }
 
@@ -225,6 +244,9 @@ std::pair<data, Error> ge(data a, data b) {
     if (r.second.has_error()) return {data(), r.second};
     res._bool = r.first.value._int >= 0;
   }
+  else if (a._type == types::_list_type) {
+    return list_cmp(a, b);
+  } 
   return {data(types::_bool, res), Error()};
 }
 
@@ -245,6 +267,9 @@ std::pair<data, Error> gt(data a, data b) {
     if (r.second.has_error()) return {data(), r.second};
     res._bool = r.first.value._int > 0;
   }
+  else if (a._type == types::_list_type) {
+    return list_cmp(a, b);
+  } 
   return {data(types::_bool, res), Error()};
 }
 
@@ -265,6 +290,9 @@ std::pair<data, Error> ee(data a, data b) {
     if (r.second.has_error()) return {data(), r.second};
     res._bool = r.first.value._int == 0;
   }
+  else if (a._type == types::_list_type) {
+    return list_cmp(a, b);
+  } 
   return {data(types::_bool, res), Error()};
 }
 
@@ -285,6 +313,9 @@ std::pair<data, Error> ne(data a, data b) {
     if (r.second.has_error()) return {data(), r.second};
     res._bool = r.first.value._int != 0;
   }
+  else if (a._type == types::_list_type) {
+    return list_cmp(a, b);
+  } 
   return {data(types::_bool, res), Error()};
 }
 

@@ -199,10 +199,10 @@ public:
     type_value _value;
     CursorPosition endPos = currentPos;
     if (dotCount == 1) {
-      _value._float = stof(num_str);
+      _value._float = stod(num_str);
       return {KEY_FLOAT, {types::_float, _value}, currentPos, endPos};
     } else {
-      _value._int = stoi(num_str);
+      _value._int = stol(num_str);
       return {KEY_INT, {types::_int, _value}, currentPos, endPos};
     }
   }

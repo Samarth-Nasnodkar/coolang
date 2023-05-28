@@ -7,6 +7,7 @@ enum types {
   _string,
   _null,
   _bool,
+  _list_type,
   _keyword,
   _id,
 };

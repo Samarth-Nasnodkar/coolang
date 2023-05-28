@@ -21,6 +21,8 @@ const Operator operators[] = {
   {KEY_RPAREN, ')', false},
   {KEY_LBRACE, '{', false},
   {KEY_RBRACE, '}', false},
+  {KEY_LBRACKET, '[', false},
+  {KEY_RBRACKET, ']', false},
 };
 
 #endif // OPERATORS_H

@@ -5,15 +5,18 @@
 #define RUNTIME_RESULT_H
 
 class RuntimeResult {
+  std::vector<data> values;
   data value;
   Error error;
   bool empty;
+  bool list;
 public:
   bool is_return;
   RuntimeResult() {
     value = data();
     error = Error();
     empty = true;
+    list = false;
     is_return = false;
   }
 
@@ -21,6 +24,7 @@ public:
     value = data();
     error = Error();
     empty = true;
+    list = false;
   }
 
   data get_value() {
@@ -59,6 +63,13 @@ public:
   RuntimeResult success(data _value) {
     value = _value;
     empty = false;
+    return *this;
+  }
+
+  RuntimeResult success(std::vector<data> &_values) {
+    values = _values;
+    empty = false;
+    list = true;
     return *this;
   }
 
