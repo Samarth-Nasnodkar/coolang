@@ -2,11 +2,15 @@
 #include "operators.h"
 #include "data.h"
 
+#include "int_ops/int_ops.h"
+#include "float_ops/float_ops.h"
+#include "str_ops/str_ops.h"
+
 #ifndef OPERATIONS_H
 #define OPERATIONS_H
 
 bool asInt(data a) {
-  return a._type == _int || a._type == _bool || a._type == _null;
+  return a._type == _int || a._type == _bool;
 }
 
 types getType(data a, data b) {
@@ -18,134 +22,98 @@ types getType(data a, data b) {
     return a._type != types::_null ? a._type : b._type;
 }
 
-data add(data a, data b) {
+std::pair<data, Error> add(data a, data b) {
   type_value res;
-  if (asInt(a) && asInt(b)) {
-    res._int = a.value._int + b.value._int;
-    return data(getType(a, b), res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._float = a.value._int + b.value._float;
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._float = a.value._float + b.value._int;
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._float = a.value._float + b.value._float;
-    return data(getType(a, b), res);
+  if (a._type == types::_int) {
+    return int_add(a, b);
+  } else if (a._type == types::_float) {
+    return float_add(a, b);
+  } else if (a._type == types::_string) {
+    return str_add(a, b);
   } else {
-    return data();
+    return {data(), Error("Invalid operands", "Invalid operands for '+'")};
   }
 }
 
-data sub(data a, data b) {
+std::pair<data, Error> sub(data a, data b) {
   type_value res;
-  if (asInt(a) && asInt(b)) {
-    res._int = a.value._int - b.value._int;
-    return data(getType(a, b), res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._float = a.value._int - b.value._float;
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._float = a.value._float - b.value._int;
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._float = a.value._float - b.value._float;
-    return data(getType(a, b), res);
+  if (a._type == types::_int) {
+    return int_sub(a, b);
+  } else if (a._type == types::_float) {
+    return float_sub(a, b);
+  } else if (a._type == types::_string) {
+    return str_sub(a, b);
   } else {
-    return data();
+    return {data(), Error("Invalid operands", "Invalid operands for '-'")};
   }
 }
 
-data mul(data a, data b) {
+std::pair<data, Error> mul(data a, data b) {
   type_value res;
-  if (asInt(a) && asInt(b)) {
-    res._int = a.value._int * b.value._int;
-    return data(getType(a, b), res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._float = a.value._int * b.value._float;
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._float = a.value._float * b.value._int;
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._float = a.value._float * b.value._float;
-    return data(getType(a, b), res);
+  if (a._type == types::_int) {
+    return int_mul(a, b);
+  } else if (a._type == types::_float) {
+    return float_mul(a, b);
+  } else if (a._type == types::_string) {
+    return str_mul(a, b);
   } else {
-    return data();
+    return {data(), Error("Invalid operands", "Invalid operands for '*'")};
   }
 }
 
-data div(data a, data b) {
+std::pair<data, Error> div(data a, data b) {
   type_value res;
-  if (asInt(a) && asInt(b)) {
-    res._int = a.value._int / b.value._int;
-    return data(getType(a, b), res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._float = a.value._int / b.value._float;
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._float = a.value._float / b.value._int;
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._float = a.value._float / b.value._float;
-    return data(getType(a, b), res);
+  if (a._type == types::_int) {
+    return int_div(a, b);
+  } else if (a._type == types::_float) {
+    return float_div(a, b);
+  } else if (a._type == types::_string) {
+    return str_div(a, b);
   } else {
-    return data();
+    return {data(), Error("Invalid operands", "Invalid operands for '/'")};
   }
 }
 
-data mod(data a, data b) {
+std::pair<data, Error> mod(data a, data b) {
   type_value res;
-  if (asInt(a) && asInt(b)) {
-    res._int = a.value._int % b.value._int;
-    return data(getType(a, b), res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._float = fmod(a.value._int, b.value._float);
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._float = fmod(a.value._float, b.value._int);
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._float = fmod(a.value._float, b.value._float);
-    return data(getType(a, b), res);
+  if (a._type == types::_int) {
+    return int_mod(a, b);
+  } else if (a._type == types::_float) {
+    return float_mod(a, b);
+  } else if (a._type == types::_string) {
+    return str_mod(a, b);
   } else {
-    return data();
+    return {data(), Error("Invalid operands", "Invalid operands for '%'")};
   }
 }
 
-data pow(data a, data b) {
+std::pair<data, Error> pow(data a, data b) {
   type_value res;
-  if (asInt(a) && asInt(b)) {
-    res._int = pow(a.value._int, b.value._int);
-    return data(getType(a, b), res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._float = pow(a.value._int, b.value._float);
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._float = pow(a.value._float, b.value._int);
-    return data(getType(a, b), res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._float = pow(a.value._float, b.value._float);
-    return data(getType(a, b), res);
+  if (a._type == types::_int) {
+    return int_pow(a, b);
+  } else if (a._type == types::_float) {
+    return float_pow(a, b);
+  } else if (a._type == types::_string) {
+    return str_pow(a, b);
   } else {
-    return data();
+    return {data(), Error("Invalid operands", "Invalid operands for '^'")};
   }
 }
 
-data neg(data a) {
+std::pair<data, Error> neg(data a) {
   type_value res;
   if (asInt(a)) {
     res._int = -a.value._int;
-    return data(types::_int, res);
+    return {data(types::_int, res), Error()};
   } else if (a._type == types::_float) {
     res._float = -a.value._float;
-    return data(types::_float, res);
+    return {data(types::_float, res), Error()};
   } else {
-    return data();
+    return {data(), Error("Invalid Operand", "Invalid Operand around '-'")};
   }
 }
 
-data logic_not(data a) {
+std::pair<data, Error> logic_not(data a) {
   type_value res;
   // if (asInt(a)) {
   //   res._bool = !a.value._bool;
@@ -155,10 +123,10 @@ data logic_not(data a) {
   //   return {types::_bool, res};
   // }
   res._bool = !a.value._int;
-  return {types::_bool, res};
+  return {{types::_bool, res}, Error()};
 }
 
-data logic_and(data a, data b) {
+std::pair<data, Error> logic_and(data a, data b) {
   type_value res;
   // if (asInt(a) && asInt(b)) {
   //   res._bool = a.value._int && b.value._int;
@@ -176,10 +144,10 @@ data logic_and(data a, data b) {
   //   return data();
   // }
   res._bool = a.value._int && b.value._int;
-  return data(types::_bool, res);
+  return {data(types::_bool, res), Error()};
 }
 
-data logic_or(data a, data b) {
+std::pair<data, Error> logic_or(data a, data b) {
   type_value res;
   // if (asInt(a) && asInt(b)) {
   //   res._bool = a.value._int || b.value._int;
@@ -197,217 +165,127 @@ data logic_or(data a, data b) {
   //   return data();
   // }
   res._bool = a.value._int || b.value._int;
-  return data(types::_bool, res);
+  return {data(types::_bool, res), Error()};
 }
 
-data le(data a, data b) {
+std::pair<data, Error> le(data a, data b) {
   type_value res;
-  if (a._type == types::_string) {
-    if (b._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) <= 0;
-    return data(types::_bool, res);
+  if (a._type == types::_int) {
+    auto r = int_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int <= 0;
   }
-  if (b._type == types::_string) {
-    if (a._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) <= 0;
-    return data(types::_bool, res);
+  else if (a._type == types::_float) {
+    auto r = float_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int <= 0;
   }
-  if (asInt(a) && asInt(b)) {
-    res._bool = a.value._int <= b.value._int;
-    return data(types::_bool, res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._bool = a.value._int <= b.value._float;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._bool = a.value._float <= b.value._int;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._bool = a.value._float <= b.value._float;
-    return data(types::_bool, res);
-  } else {
-    return data();
+  else if (a._type == types::_string) {
+    auto r = str_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int <= 0;
   }
+  return {data(types::_bool, res), Error()};
 }
 
-data lt(data a, data b) {
+std::pair<data, Error> lt(data a, data b) {
   type_value res;
-  if (a._type == types::_string) {
-    if (b._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) < 0;
-    return data(types::_bool, res);
+  if (a._type == types::_int) {
+    auto r = int_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int < 0;
   }
-  if (b._type == types::_string) {
-    if (a._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) < 0;
-    return data(types::_bool, res);
+  else if (a._type == types::_float) {
+    auto r = float_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int < 0;
   }
-  if (asInt(a) && asInt(b)) {
-    res._bool = a.value._int < b.value._int;
-    return data(types::_bool, res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._bool = a.value._int < b.value._float;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._bool = a.value._float < b.value._int;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._bool = a.value._float < b.value._float;
-    return data(types::_bool, res);
-  } else {
-    return data();
+  else if (a._type == types::_string) {
+    auto r = str_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int < 0;
   }
+  return {data(types::_bool, res), Error()};
 }
 
-data ge(data a, data b) {
+std::pair<data, Error> ge(data a, data b) {
   type_value res;
-  if (a._type == types::_string) {
-    if (b._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) >= 0;
-    return data(types::_bool, res);
+  if (a._type == types::_int) {
+    auto r = int_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int >= 0;
   }
-  if (b._type == types::_string) {
-    if (a._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) >= 0;
-    return data(types::_bool, res);
+  else if (a._type == types::_float) {
+    auto r = float_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int >= 0;
   }
-  if (asInt(a) && asInt(b)) {
-    res._bool = a.value._int > b.value._int;
-    return data(types::_bool, res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._bool = a.value._int > b.value._float;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._bool = a.value._float > b.value._int;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._bool = a.value._float > b.value._float;
-    return data(types::_bool, res);
-  } else {
-    return data();
+  else if (a._type == types::_string) {
+    auto r = str_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int >= 0;
   }
+  return {data(types::_bool, res), Error()};
 }
 
-data gt(data a, data b) {
+std::pair<data, Error> gt(data a, data b) {
   type_value res;
-  if (a._type == types::_string) {
-    if (b._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) > 0;
-    return data(types::_bool, res);
+  if (a._type == types::_int) {
+    auto r = int_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int > 0;
   }
-  if (b._type == types::_string) {
-    if (a._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) > 0;
-    return data(types::_bool, res);
+  else if (a._type == types::_float) {
+    auto r = float_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int > 0;
   }
-  if (asInt(a) && asInt(b)) {
-    res._bool = a.value._int > b.value._int;
-    return data(types::_bool, res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._bool = a.value._int > b.value._float;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._bool = a.value._float > b.value._int;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._bool = a.value._float > b.value._float;
-    return data(types::_bool, res);
-  } else {
-    return data();
+  else if (a._type == types::_string) {
+    auto r = str_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int > 0;
   }
+  return {data(types::_bool, res), Error()};
 }
 
-data ee(data a, data b) {
+std::pair<data, Error> ee(data a, data b) {
   type_value res;
-  if (a._type == types::_string) {
-    if (b._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) == 0;
-    return data(types::_bool, res);
+  if (a._type == types::_int) {
+    auto r = int_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int == 0;
   }
-  if (b._type == types::_string) {
-    if (a._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) == 0;
-    return data(types::_bool, res);
+  else if (a._type == types::_float) {
+    auto r = float_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int == 0;
   }
-  if (asInt(a) && asInt(b)) {
-    res._bool = a.value._int == b.value._int;
-    return data(types::_bool, res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._bool = a.value._int == b.value._float;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._bool = a.value._float == b.value._int;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._bool = a.value._float == b.value._float;
-    return data(types::_bool, res);
-  } else {
-    return data();
+  else if (a._type == types::_string) {
+    auto r = str_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int == 0;
   }
+  return {data(types::_bool, res), Error()};
 }
 
-data ne(data a, data b) {
+std::pair<data, Error> ne(data a, data b) {
   type_value res;
-  if (a._type == types::_string) {
-    if (b._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) != 0;
-    return data(types::_bool, res);
+  if (a._type == types::_int) {
+    auto r = int_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int != 0;
   }
-  if (b._type == types::_string) {
-    if (a._type != types::_string) {
-      res._bool = false;
-      return data(types::_bool, res);
-    }
-    res._bool = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000))) != 0;
-    return data(types::_bool, res);
+  else if (a._type == types::_float) {
+    auto r = float_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int != 0;
   }
-  if (asInt(a) && asInt(b)) {
-    res._bool = a.value._int != b.value._int;
-    return data(types::_bool, res);
-  } else if (asInt(a) && b._type == types::_float) {
-    res._bool = a.value._int != b.value._float;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && asInt(b)) {
-    res._bool = a.value._float != b.value._int;
-    return data(types::_bool, res);
-  } else if (a._type == types::_float && b._type == types::_float) {
-    res._bool = a.value._float != b.value._float;
-    return data(types::_bool, res);
-  } else {
-    return data();
+  else if (a._type == types::_string) {
+    auto r = str_cmp(a, b);
+    if (r.second.has_error()) return {data(), r.second};
+    res._bool = r.first.value._int != 0;
   }
+  return {data(types::_bool, res), Error()};
 }
 
 #endif

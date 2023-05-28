@@ -3,6 +3,7 @@
 #include "../variables/operations.h"
 #include "scope.h"
 #include "type_casting.h"
+#include "primitive_func.h"
 
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
@@ -19,13 +20,15 @@ public:
   }
 
   bool registerFunction(int scopeIndex, std::string function_name, node **function_node) {
-    if (scopes[scopeIndex].localScope.find(function_name) != scopes[scopeIndex].localScope.end()) return false;
+    if (scopes[scopeIndex].localScope.find(function_name) != scopes[scopeIndex].localScope.end()) 
+      return false;
     scopes[scopeIndex].functionScope[function_name] = *function_node;
     return true;
   } 
 
   bool registerVariable(int scopeIndex, std::string variable_name, data val) {
-    if (scopes[scopeIndex].localScope.find(variable_name) != scopes[scopeIndex].localScope.end()) return false;
+    if (scopes[scopeIndex].localScope.find(variable_name) != scopes[scopeIndex].localScope.end()) 
+      return false;
     scopes[scopeIndex].localScope[variable_name] = val;
     return true;
   }
@@ -40,12 +43,42 @@ public:
     return -1;
   }
 
+  bool isPrimitive(std::string function_name) {
+    for(int i = 0; i < sizeof(primitive_funcs) / sizeof(primitive_funcs[0]); i++) {
+      if (primitive_funcs[i] == function_name) return true;
+    }
+    return false;
+  }
+
   bool isFunction(int scopeIndex) {
     while (scopeIndex >= 0) {
       if (scopes[scopeIndex].function) return true;
       --scopeIndex;
     }
     return false;
+  }
+
+  std::pair<data, Error> handlePrimitive(node *func) {
+    std::string func_name = func->token.get_name();
+    if (func_name == "print") {
+      int argc = func->children.size();
+      data argv[argc];
+      for(int i = 0; i < argc; i++) {
+        auto _res = visit(func->children[i]);
+        if (_res.has_error()) return {data(), _res.get_error()};
+        argv[i] = _res.get_value();
+      }
+      return {print(argv, argc), Error()};
+    }
+    if (func_name == "type_of") {
+      if (func->children.size() != 1) {
+        return {data(), Error("Invalid Prameters", "Expected 1 got " + func->children.size())};
+      } 
+      auto v = visit(func->children[0]);
+      if (v.has_error()) return {data(), v.get_error()};
+      return {type_of(v.get_value()), Error()};
+    }
+    return {data(), Error()};
   }
 
   RuntimeResult visit(node *_node, int scopeIndex = -1) {
@@ -63,51 +96,85 @@ public:
       case node_type::_nullnode: {
         return RuntimeResult().success(_node->token.get_value());
       }
-      case node_type::_unary_operator: {
-        auto right = visit(_node->right);
-        if (right.has_error()) return right;
-        if (_node->token.get_name() == KEY_ADD) {
-          return {RuntimeResult().success(right.get_value())};
-        } else if (_node->token.get_name() == KEY_SUB) {
-          return {RuntimeResult().success(neg(right.get_value()))};
-        } else if (_node->token.get_name() == KEY_NOT) {
-          return {RuntimeResult().success(logic_not(right.get_value()))};
-        }
-      }
       case node_type::_binary_operator: {
         auto left = visit(_node->left);
         if (left.has_error()) return left;
         auto right = visit(_node->right);
         if (right.has_error()) return right;
         if (_node->token.get_name() == KEY_ADD) {
-          return RuntimeResult().success(add(left.get_value(), right.get_value()));
+          auto r = add(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_SUB) {
-          return RuntimeResult().success(sub(left.get_value(), right.get_value()));
+          auto r = sub(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_MUL) {
-          return RuntimeResult().success(mul(left.get_value(), right.get_value()));
+          auto r = mul(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_DIV) {
-          return RuntimeResult().success(div(left.get_value(), right.get_value()));
+          auto r = div(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_MOD) {
-          return RuntimeResult().success(mod(left.get_value(), right.get_value()));
+          auto r = mod(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_POW) {
-          return RuntimeResult().success(pow(left.get_value(), right.get_value()));
+          auto r = pow(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_EE) {
-          return RuntimeResult().success(ee(left.get_value(), right.get_value()));
+          auto r = ee(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_NE) {
-          return RuntimeResult().success(ne(left.get_value(), right.get_value()));
+          auto r = ne(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_LT) {
-          return RuntimeResult().success(lt(left.get_value(), right.get_value()));
+          auto r = lt(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_GT) {
-          return RuntimeResult().success(gt(left.get_value(), right.get_value()));
+          auto r = gt(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_LE) {
-          return RuntimeResult().success(le(left.get_value(), right.get_value()));
+          auto r = le(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_GE) {
-          return RuntimeResult().success(ge(left.get_value(), right.get_value()));
+          auto r = ge(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_AND) {
-          return RuntimeResult().success(logic_and(left.get_value(), right.get_value()));
+          auto r = logic_and(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         } else if (_node->token.get_name() == KEY_OR) {
-          return RuntimeResult().success(logic_or(left.get_value(), right.get_value()));
+          auto r = logic_or(left.get_value(), right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
         }
+        return RuntimeResult().failure(Error("Unknown Binary Operator", "Unknown Binary Operator Found"));
+      }
+      case node_type::_unary_operator: {
+        auto right = visit(_node->right);
+        if (right.has_error()) return right;
+        if (_node->token.get_name() == KEY_ADD) {
+          return {RuntimeResult().success(right.get_value())};
+        } else if (_node->token.get_name() == KEY_SUB) {
+          auto r = neg(right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
+        } else if (_node->token.get_name() == KEY_NOT) {
+          auto r = logic_not(right.get_value());
+          if (r.second.has_error()) return RuntimeResult().failure(r.second);
+          return RuntimeResult().success(r.first);
+        }
+        return RuntimeResult().failure(Error("Unknown Unary Operator", "Unknown Unary Operator Found"));
       }
       case node_type::_variable_assign: {
         if (scopes[scopeIndex].localScope.find(_node->token.get_name()) != scopes[scopeIndex].localScope.end()) {
@@ -130,10 +197,8 @@ public:
         }
         auto value = visit(_node->left);
         if (value.has_error()) return value;
-        // std::cout << (*_scope)->localScope.size() << std::endl;
         data _res = value.get_value();
         scopes[itr].localScope[_node->token.get_name()] = _res;
-        // std::cout << (*_scope)->localScope.size() << std::endl;
         return RuntimeResult().success(_res);
       }
       case node_type::_variable_access: {
@@ -162,9 +227,6 @@ public:
         RuntimeResult result;
         for (auto child : _node->children) {
           if (child->value == node_type::_return) {
-            // auto _res = visit(child->left);
-            // if (_res.has_error()) return {RuntimeResult().failure(_res.get_error())};
-            // return {RuntimeResult().success(_res[0].get_value())};
             auto _res = visit(child, scopeIndex);
             _res.is_return = true;
             return _res;
@@ -240,6 +302,11 @@ public:
       case node_type::_function_call: {
         int _indx = isRegisteredFunc(scopeIndex, _node->token.get_name());
         if (_indx == -1) {
+          if (isPrimitive(_node->token.get_name())) {
+            auto _res = handlePrimitive(_node);
+            if (_res.second.has_error()) return RuntimeResult().failure(_res.second);
+            return RuntimeResult().success(_res.first);
+          }
           return RuntimeResult().failure(Error("Name Error", "Function is not defined"));
         }
         node *_func = scopes[_indx].functionScope[_node->token.get_name()];

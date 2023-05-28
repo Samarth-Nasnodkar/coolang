@@ -51,10 +51,12 @@ public:
     for (auto &node : parseRes.first) {
       auto interpretRes = interpreter.visit(node);
       if (interpretRes.get_error().has_error()) {
-      } else {
-          if (!interpretRes.is_empty()) 
-            std::cout << interpretRes.get_value().to_string() << std::endl;
-      }
+        std::cout << interpretRes.get_error().to_string() << std::endl;
+      } 
+      // else {
+      //     if (!interpretRes.is_empty()) 
+      //       std::cout << interpretRes.get_value().to_string() << std::endl;
+      // }
     }
 
     // auto interpretRes = interpreter.visit(parseRes.first);
