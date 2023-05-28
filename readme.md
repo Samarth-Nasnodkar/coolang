@@ -83,3 +83,10 @@ Functions can be called just like how you're used to, using the good-old `()`
 ```
 let a = foo()
 ```
+
+### Primitive Functions
+```
+print(10, 15, 20)
+type_of(10)
+len([1, 2, 3, 4, 5])
+```

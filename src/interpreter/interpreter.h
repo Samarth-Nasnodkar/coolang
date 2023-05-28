@@ -33,6 +33,7 @@ public:
     return true;
   }
 
+
   int isRegisteredFunc(int scopeIndex, std::string function_name) {
     while (scopeIndex >= 0) {
       if (scopes[scopeIndex].functionScope.find(function_name) != scopes[scopeIndex].functionScope.end()) {
@@ -78,6 +79,14 @@ public:
       if (v.has_error()) return {data(), v.get_error()};
       return {type_of(v.get_value()), Error()};
     }
+    if (func_name == "len") {
+      if (func->children.size() != 1) {
+        return {data(), Error("Invalid Prameters", "Expected 1 got " + func->children.size())};
+      } 
+      auto v = visit(func->children[0]);
+      if (v.has_error()) return {data(), v.get_error()};
+      return {len(v.get_value()), Error()};
+    }
     return {data(), Error()};
   }
 
@@ -104,6 +113,30 @@ public:
         int len = _node->children.size();
         v._list = new _llist{r, len};
         return RuntimeResult().success(data(types::_list_type, v));
+      }
+      case node_type::_index: {
+        int itr = scopeIndex;
+        while (itr >= 0 && scopes[itr].localScope.find(_node->token.get_name()) == scopes[itr].localScope.end()) {
+          itr--;
+        }
+        if (itr == -1)
+          return RuntimeResult().failure(Error("Name Error", "Variable is not defined"));
+        
+        auto list_var = scopes[itr].localScope[_node->token.get_name()];
+        if (list_var._type != _list_type) {
+          return RuntimeResult().failure(Error("Type Error", "Index operator used on " + type_of(list_var).to_string()));
+        }
+        auto _index = visit(_node->left);
+        if (_index.has_error()) return _index;
+        if (_index.get_value()._type != types::_int) {
+          return RuntimeResult().failure(Error("Type Error", "Index operator used with " + type_of(_index.get_value()).to_string()));
+        }
+        int index = _index.get_value().value._int;
+        if (index < 0 || index >= list_var.value._list->size) {
+          return RuntimeResult().failure(Error("Index Error", "Index out of range"));
+        }
+        data *_data = (data*)list_var.value._list->_data;
+        return RuntimeResult().success(_data[index]);
       }
       case node_type::_nullnode: {
         return RuntimeResult().success(_node->token.get_value());

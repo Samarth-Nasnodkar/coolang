@@ -11,6 +11,23 @@ data print(data *a, int n) {
   return data();
 }
 
+data len(data a) {
+  if (a._type == types::_string) {
+    int _len = strnlen(a.value._string, 10000);
+    type_value v;
+    v._int = _len;
+    return data(types::_int, v);
+  } else if (a._type == types::_list_type) {
+    int _len = a.value._list->size;
+    type_value v;
+    v._int = _len;
+    return data(types::_int, v);
+  } else {
+    std::cout << "TypeError: len() only accepts strings and lists" << std::endl;
+    exit(1);
+  }
+}
+
 data type_of(data a) {
   type_value v;
   std::string _type_str = types_str[a._type];
@@ -21,7 +38,8 @@ data type_of(data a) {
 
 std::string primitive_funcs[] = {
   "print",
-  "type_of"
+  "type_of",
+  "len",
 };
 
 #endif

@@ -43,6 +43,12 @@ std::string node_type_to_string(node_type type) {
       return "function_call";
     case node_type::_return:
       return "return";
+    case node_type::_nullnode:
+      return "nullnode";
+    case node_type::_boolean:
+      return "boolean";
+    case node_type::_list:
+      return "list";
     default:
       return "unknown";
   }
@@ -81,6 +87,11 @@ void printNode(node *node) {
   }
   else {
     std::cout << node->token.to_string() << "(" << node_type_to_string(node->value) << ") ";
+    std::cout << "{ ";
+    for(auto child : node->children) {
+      printNode(child);
+    }
+    std::cout << "} ";
   }
 }
 

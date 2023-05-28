@@ -6,6 +6,7 @@ enum node_type {
   _boolean,
   _str,
   _list,
+  _index,
   _unary_operator,
   _binary_operator,
   _variable_assign,

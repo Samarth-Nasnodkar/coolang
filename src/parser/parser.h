@@ -6,7 +6,7 @@
 #include "node.h"
 
 /*
-atom : INT | FLOAT | STR | LIST | IDENTIFIER
+atom : INT | FLOAT | STR | LIST | LIST_ELEM | IDENTIFIER
      : LPAREN PREC_5 RPAREN
 
 FUNCTION_CALL : FUNC_CALL
@@ -82,6 +82,7 @@ public:
     } else {
       currentToken = Token(KEY_EOF, CursorPosition(), CursorPosition());
     }
+    // std::cout << currentToken.to_string() << std::endl;
   }
 
   void reverse(int amount = 1) {
@@ -177,8 +178,20 @@ public:
     }
 
     if (currentToken.get_value()._type == types::_id) {
-      node *_node = new node{currentToken, node_type::_variable_access, nullptr, nullptr};
+      auto id = currentToken;
       advance();
+      if (currentToken.get_name() == KEY_LBRACKET) {
+        advance();
+        auto _index = parsePrec8();
+        if (_index.second.has_error()) return std::make_pair(new node(), _index.second);
+        if (currentToken.get_name() != KEY_RBRACKET) {
+          return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected ']'"));
+        }
+        advance();
+        node *_node = new node{id, node_type::_index, _index.first, nullptr};
+        return std::make_pair(_node, Error());
+      }
+      node *_node = new node{id, node_type::_variable_access, nullptr, nullptr};
       return std::make_pair(_node, Error());
     }
 

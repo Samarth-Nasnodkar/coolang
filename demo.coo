@@ -16,3 +16,9 @@ while a < 10 {
   a += 1
 }
 print(arr)
+
+a = 0
+while a < len(arr) {
+  print(arr[a])
+  a += 1
+}
