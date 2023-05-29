@@ -24,6 +24,7 @@ const std::string KEY_RBRACKET = "RBRACKET";
 const std::string KEY_CODE_BLOCK = "CODE_BLOCK";
 const std::string KEY_NEWLINE = "NEWLINE";
 const std::string KEY_EOF = "EOF";
+const std::string KEY_DOT = "DOT";
 
 const std::string KEY_PLUS_EQUALS = "PLUS_EQUALS";
 const std::string KEY_MINUS_EQUALS = "MINUS_EQUALS";
@@ -54,7 +55,12 @@ const std::string KEY_ELIF = "elif";
 const std::string KEY_WHILE = "while";
 const std::string KEY_FUNCTION = "fn";
 const std::string KEY_RETURN = "return";
+const std::string KEY_OBJECT = "object";
+const std::string KEY_FIELD = "field";
+const std::string KEY_CONSTRUCTOR = "constructor";
+const std::string KEY_THIS = "this";
 
+const std::string KEY_OBJECT_BODY = "OBJECT_BODY";
 const std::string SEP_COMMA = "COMMA";
 
 const std::string keywords[] = {
@@ -72,6 +78,8 @@ const std::string keywords[] = {
   KEY_WHILE,
   KEY_FUNCTION,
   KEY_RETURN,
+  KEY_OBJECT,
+  KEY_FIELD
 };
 
 #endif // KEYWORDS_H

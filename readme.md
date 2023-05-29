@@ -90,3 +90,54 @@ print(10, 15, 20)
 type_of(10)
 len([1, 2, 3, 4, 5])
 ```
+
+## Classes!!
+### Or Objects as we like to call them
+
+### Definition/Declaration
+```
+object Person {
+  field name
+  field age
+
+  constructor (_name, _age) {
+    name = _name
+    age = _age
+  }
+
+  fn printData() {
+    print("Name =", name, ", Age =", age)
+  }
+}
+```
+No self referencing keyword has been added yet, but will soon be!!! Stay tuned.  
+Also no data hiding is implemented yet (Eg. `public`/`private` fields/methods), but will soon be!!
+Also you cannot set the value of a field outside the object yet
+```
+object Person {
+  field name
+  field age
+
+  constructor (_name, _age) {
+    name = _name
+    age = _age
+  }
+
+  fn updateName(_name) {
+    name = _name
+  }
+}
+```
+Works
+```
+let p = Person("Samarth", 19)
+p.name = "Max"
+```
+Doesn't work
+
+### Instantiation
+Following the previous declaration of Object `Person`
+```
+let p = Person("Samarth", 19)
+p.printData()
+```

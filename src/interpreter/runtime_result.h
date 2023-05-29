@@ -1,11 +1,13 @@
 #include "../variables/data.h"
 #include "../error/error.h"
+#include "scope.h"
 
 #ifndef RUNTIME_RESULT_H
 #define RUNTIME_RESULT_H
 
 class RuntimeResult {
   std::vector<data> values;
+  obj *obj_value;
   data value;
   Error error;
   bool empty;
@@ -13,6 +15,7 @@ class RuntimeResult {
 public:
   bool is_return;
   RuntimeResult() {
+    obj_value = nullptr;
     value = data();
     error = Error();
     empty = true;
@@ -21,6 +24,7 @@ public:
   }
 
   void reset() {
+    obj_value = nullptr;
     value = data();
     error = Error();
     empty = true;
@@ -61,6 +65,14 @@ public:
     return error.has_error();
   }
 
+  obj **get_obj() {
+    return &obj_value;
+  }
+
+  void setName(std::string _name) {
+    obj_value->_name = _name;
+  }
+
   std::string to_string() {
     if (error.has_error()) {
       return error.to_string();
@@ -69,12 +81,20 @@ public:
   }
 
   RuntimeResult success(data _value) {
+    obj_value = nullptr;
     value = _value;
     empty = false;
     return *this;
   }
 
+  RuntimeResult success(obj **_obj) {
+    obj_value = *_obj;
+    empty = false;
+    return *this;
+  }
+
   RuntimeResult success(std::vector<data> &_values) {
+    obj_value = nullptr;
     values = _values;
     empty = false;
     list = true;

@@ -44,9 +44,6 @@ public:
     //   printNode(r);
     // }
     // std::cout << std::endl;
-
-    // printNode(parseRes.first);
-    // std::cout << std::endl;
     
     for (auto &node : parseRes.first) {
       auto interpretRes = interpreter.visit(node);

@@ -90,6 +90,11 @@ public:
         tokens.emplace_back(res);
         continue;
       }
+      if (currentChar == '.') {
+        tokens.emplace_back(Token(KEY_DOT, currentPos, currentPos));
+        advance();
+        continue;
+      }
       if (currentChar == '<') {
         tokens.emplace_back(makeLTE());
         continue;
@@ -138,8 +143,8 @@ public:
       advance();
     }
     type_value v;
-    v._string = new char[sizeof(_str.c_str()) + 1];
-    strncpy(v._string, _str.c_str(), sizeof(_str.c_str()));
+    v._string = new char[strlen(_str.c_str()) + 1];
+    strncpy(v._string, _str.c_str(), strlen(_str.c_str()));
     advance();
     return {KEY_STRING, {types::_string, v}, startpos, currentPos};
   }

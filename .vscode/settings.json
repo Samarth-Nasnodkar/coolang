@@ -84,6 +84,7 @@
     "iomanip": "cpp",
     "stack": "cpp",
     "__memory": "cpp",
-    "filesystem": "cpp"
+    "filesystem": "cpp",
+    "list": "cpp"
   }
 }

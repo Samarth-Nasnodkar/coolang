@@ -13,7 +13,7 @@ data print(data *a, int n) {
 
 data len(data a) {
   if (a._type == types::_string) {
-    int _len = strnlen(a.value._string, 10000);
+    int _len = strlen(a.value._string);
     type_value v;
     v._int = _len;
     return data(types::_int, v);

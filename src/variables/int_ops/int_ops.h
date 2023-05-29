@@ -42,7 +42,7 @@ std::pair<data, Error> int_mul(data a, data b) {
     _res._int = a.value._int * b.value._float;
   } else if (b._type == types::_string) {
     int c = a.value._int;
-    int b_len = strnlen(b.value._string, 10000);
+    int b_len = strlen(b.value._string);
     _res._string = new char[b_len * c + 1];
     for(int i = 0; i < c; i++)
       strncat(_res._string, b.value._string, b_len);

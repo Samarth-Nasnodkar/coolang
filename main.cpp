@@ -2,6 +2,10 @@
 #include "src/coolang.h"
 
 int main(int argc, char **argv) {
-  Coolang().run(argc > 1 ? argv[1] : "demo.coo");
+  if (argc < 2) {
+    std::cout << "Usage: " << argv[0] << " <file>" << std::endl;
+    return 1;
+  }
+  Coolang().run(argv[1]);
   return 0;
 }

@@ -10,8 +10,8 @@ std::pair<data, Error> str_add(data a, data b) {
   type_value _res;
   if (b._type == types::_int || b._type == types::_float || b._type == types::_string) {
     std::string r = b.to_string();
-    int a_len = strnlen(a.value._string, 10000);
-    int b_len = strnlen(b.value._string, 10000);
+    int a_len = strlen(a.value._string);
+    int b_len = strlen(b.value._string);
     _res._string = new char[a_len + b_len + 1];
     strncpy(_res._string, a.value._string, a_len);
     strncat(_res._string, b.value._string, b_len);
@@ -30,7 +30,7 @@ std::pair<data, Error> str_mul(data a, data b) {
   type_value _res;
   if (b._type == types::_int) {
     int c = b.value._int;
-    int a_len = strnlen(a.value._string, 10000);
+    int a_len = strlen(a.value._string);
     _res._string = new char[a_len * c + 1];
     for(int i = 0; i < c; i++)
       strncat(_res._string, a.value._string, a_len);
@@ -65,7 +65,7 @@ std::pair<data, Error> str_cmp(data a, data b) {
   } else if (b._type == types::_float) {
     return {data(), Error("Invalid Operator", "Cannot compare str and float")};
   } else if (b._type == types::_string) {
-    _res._int = strncmp(a.value._string, b.value._string, std::max(strnlen(a.value._string, 10000), strnlen(b.value._string, 10000)));
+    _res._int = strncmp(a.value._string, b.value._string, std::max(strlen(a.value._string), strlen(b.value._string)));
   } else if (b._type == types::_null) {
     return {data(), Error("Invalid Operator", "Cannot compare str and null")};
   }

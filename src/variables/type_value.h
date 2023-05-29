@@ -9,7 +9,7 @@ struct _llist {
 };
 
 union type_value {
-  long int _int;
+  long long int _int;
   double _float;
   char _char;
   bool _bool;

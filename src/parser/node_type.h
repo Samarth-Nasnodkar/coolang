@@ -18,7 +18,14 @@ enum node_type {
   _while_loop,
   _function_definition,
   _function_call,
+  _method_definition,
+  _method_call,
+  _object_definition,
+  _object_body,
+  _dot,
   _return,
+  _field_assign,
+  _field_access,
   _nullnode
 };
 

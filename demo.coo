@@ -1,24 +1,30 @@
-fn fibonacci(n) {
-  if n <= 2 {
-    return n - 1
+object person {
+  field name
+  field age
+
+  constructor(_name, _age) {
+    name = _name
+    age = _age
   }
 
-  return fibonacci(n - 1) + fibonacci(n - 2)
+  fn printData() {
+    print("Name =", name, ", Age = ", age)
+  }
+
+  fn updateName(_name) {
+    name = _name
+  }
+
 }
 
-let a = 1
-const arr = []
-
-print(arr)
-
-while a < 10 {
-  arr += fibonacci(a)
-  a += 1
+fn makeNew(_p) {
+  return _p
 }
-print(arr)
 
-a = 0
-while a < len(arr) {
-  print(arr[a])
-  a += 1
-}
+let p = person("Samarth", 19)
+p.printData()
+let k = makeNew(p)
+k.printData()
+p.updateName("Raj")
+p.printData()
+k.printData()

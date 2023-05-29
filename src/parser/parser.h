@@ -12,6 +12,9 @@ atom : INT | FLOAT | STR | LIST | LIST_ELEM | IDENTIFIER
 FUNCTION_CALL : FUNC_CALL
               : atom
 
+PREC_DOT : FUNCTION_CALL DOT FUNCTION_CALL
+         : FUNCTION_CALL
+
 PREC_0 : FUNCTION_CALL POW FUNCTION_CALL
        : FUNCTION_CALL
 
@@ -56,6 +59,15 @@ PREC_WHILE : while condition CODE_BLOCK
 PREC_FUNCTION : FUNCTION IDENTIFIER LPAREN IDENTIFIER RPAREN FUNCTION_BLOCK
               : FUNCTION IDENTIFIER LPAREN RPAREN FUNCTION_BLOCK
               : PREC_WHILE
+
+FIELD_DECL : field IDENTIFIER EQ PREC_7
+
+PREC_METHOD : FUNCTION IDENTIFIER LPAREN (IDENTIFIER) RPAREN FUNCTION_BLOCK
+            : IDENTIFIER LPAREN (IDENTIFIER) RPAREN FUNCTION_BLOCK
+
+OBJECT_BODY : { FIELD_DECL | PREC_METHOD ... }
+
+PREC_OBJECT : object IDENTIFIER OBJECT_BODY
 
 code_block : { PREC_FUNCTION ... }
            : PREC_FUNCTION EOL | EOF
@@ -222,13 +234,27 @@ public:
     return parseAtom();
   }
 
+  std::pair<node *, Error> parseDot() {
+    auto expr = parseFunctionCall();
+    if (expr.second.has_error()) return std::make_pair(new node(), expr.second);
+    if (currentToken.get_name() == KEY_DOT) {
+      auto id = currentToken;
+      advance();
+      auto expr2 = parseFunctionCall();
+      if (expr2.second.has_error()) return std::make_pair(new node(), expr2.second);
+      node *_node = new node{id, node_type::_dot, expr.first, expr2.first};
+      return std::make_pair(_node, Error());
+    }
+    return expr;
+  }
+
   std::pair<node *, Error> parsePrec0() {
-    auto left = parseFunctionCall();
+    auto left = parseDot();
     if (left.second.has_error()) return std::make_pair(new node(), left.second);
     if (currentToken.get_name() == KEY_POW) {
       auto op = currentToken;
       advance();
-      auto right = parseFunctionCall();
+      auto right = parseDot();
       if (right.second.has_error()) return std::make_pair(new node(), right.second);
       return std::make_pair(new node{op, node_type::_binary_operator, left.first, right.first}, Error());
     }
@@ -518,6 +544,16 @@ public:
       advance();
       return std::make_pair(new node{Token(KEY_CODE_BLOCK, CursorPosition(), CursorPosition()), node_type::_code_block, nullptr, nullptr, nodes}, Error());
     }
+    if (currentToken.get_name() == KEY_OBJECT) {
+      advance();
+      if (currentToken.get_value()._type != types::_id)
+        return {new node(), Error("Invalid Syntax Error", "Expected identifier after keyword 'object'")};
+      auto identifier = currentToken;
+      advance();
+      auto body = parseObjectBody();
+      if (body.second.has_error()) return {new node(), body.second};
+      return {new node{identifier, node_type::_object_definition, body.first}, Error()};
+    }
 
     return parsePrecFunction();
   }
@@ -530,6 +566,91 @@ public:
     }
     
     return code_block;
+  }
+
+  std::pair<node *, Error> precField() {
+    if (currentToken.get_value()._type == types::_keyword && currentToken.get_name() == KEY_FIELD) {
+      advance();
+      if (currentToken.get_value()._type != types::_id) 
+        return {new node(), Error("Invalid Syntax Error", "Expected identifier after 'field'")};
+      
+      auto identifier = currentToken;
+      advance();
+
+      if (currentToken.get_name() == KEY_EQ) {
+        advance();
+        auto expr = parsePrec7();
+        if (expr.second.has_error()) return {new node(), expr.second};
+
+        return {new node{identifier, node_type::_field_assign, expr.first}, Error()};
+      }
+
+      return {new node{identifier, node_type::_field_assign, nullptr}, Error()};
+    }
+
+    return {new node(), Error("Invalid Syntax Error", "Expected keyword 'field' before declaration")};
+  }
+
+  std::pair<node *, Error> precMethod() {
+    if (currentToken.get_name() == KEY_CONSTRUCTOR || currentToken.get_name() == KEY_FUNCTION) {
+      if (currentToken.get_name() == KEY_FUNCTION) {
+        advance();
+        if (currentToken.get_value()._type != types::_id) {
+          return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected identifier"));
+        }
+      }
+      auto identifier = currentToken;
+      advance();
+      if (currentToken.get_name() != KEY_LPAREN) {
+        return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected '('"));
+      }
+      
+      advance();
+      std::vector<Token> args;
+      while (currentToken.get_name() != KEY_RPAREN) {
+        if (currentToken.get_value()._type != types::_id) {
+          return std::make_pair(new node(), Error("Invalid Syntax Error", "Expected identifier"));
+        }
+        args.push_back(currentToken);
+        advance();
+        if (currentToken.get_name() == SEP_COMMA) {
+          advance();
+          continue;
+        }
+      }
+      advance();
+      auto code_block = parseFunctionBlock();
+      if (code_block.second.has_error()) return std::make_pair(new node(), code_block.second);
+      return std::make_pair(new node{identifier, node_type::_method_call, code_block.first, .args = args}, Error());
+    }
+    return {new node(), Error("Invalid Syntax Error", "Unidentifier default method " + currentToken.get_name())};
+  }
+
+  std::pair<node *, Error> parseObjectBody() {
+    if (currentToken.get_name() != KEY_LBRACE) {
+      return {new node(), Error("Invalid Syntax Error", "Expected '{' after object declaration")};
+    }
+    advance();
+    std::vector<node *> children;
+    while (currentToken.get_name() != KEY_RBRACE) {
+      if (currentToken.get_name() == KEY_FIELD) {
+        auto _f = precField();
+        if (_f.second.has_error()) return {new node(), _f.second};
+        children.push_back(_f.first);
+      }
+      else if (currentToken.get_name() == KEY_FUNCTION || currentToken.get_name() == KEY_CONSTRUCTOR) {
+        auto _f = precMethod();
+        if (_f.second.has_error()) return {new node(), _f.second};
+        children.push_back(_f.first);
+      }
+      else if (currentToken.get_name() == KEY_NEWLINE) {
+        advance();
+      }
+      else 
+        return {new node(), Error("Invalid Syntax Error", "Unexpected Token " + currentToken.get_name() + " found")};
+    }
+    advance();
+    return {new node{Token(KEY_OBJECT_BODY, CursorPosition(), CursorPosition()), node_type::_object_body, .children = children}, Error()};
   }
 };
 
