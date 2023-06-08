@@ -27,6 +27,25 @@ A string can be declared using single `'` or double `"` quotes. As you please! w
 ### list
 Lists here are very similar to python, flexible in length and can hold any data type.
 
+## Comments
+
+Single line comments can be written using `#`
+```
+# This is a comment!
+```
+Multi line comments can be written using the string quotes
+```
+"
+This is a 
+multi line comment
+"
+
+'
+This is a 
+multi line comment too!
+'
+```
+
 ## Variable Declaration
 Variables can start with any character from the alphabet or an `_` but not any numeric character.  
 Variables can be declared using the `let` keyword followed by the identifier
@@ -34,6 +53,7 @@ Variables can be declared using the `let` keyword followed by the identifier
 let a = 10
 let arr = [0] * 10
 ```
+Lists cannot hold objects yet! Will be added soon
 ### And lines don't end with semi-colons!!!
 
 ## Code Block
@@ -51,13 +71,13 @@ The if statements are pretty similar to that of C but without the ugly paranthes
 Let them be free!
 ```
 if a % 15 == 0 {
-  FizzzBuzzz
+  print('FizzzBuzzz')
 } elif a % 5 == 0 {
-  Fizz
+  print('Fizz')
 } elif a % 3 == 0 {
-  Buzz
+  print('Buzz')
 } else {
-  a
+  print(a)
 }
 ```
 

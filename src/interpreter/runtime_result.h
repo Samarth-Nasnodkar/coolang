@@ -6,46 +6,54 @@
 #define RUNTIME_RESULT_H
 
 class RuntimeResult {
-  std::vector<data> values;
+  std::vector<std::map<runtime_type, void *>> values;
   obj *obj_value;
-  data value;
+  data *var_value;
+  node *func_value;
+  runtime_type _type;
   Error error;
   bool empty;
   bool list;
 public:
   bool is_return;
   RuntimeResult() {
+    reset();
+  }
+
+  void reset() {
     obj_value = nullptr;
-    value = data();
+    var_value = nullptr;
+    func_value = nullptr;
     error = Error();
     empty = true;
     list = false;
     is_return = false;
   }
 
-  void reset() {
-    obj_value = nullptr;
-    value = data();
-    error = Error();
-    empty = true;
-    list = false;
-  }
-
-  data get_value() {
-    return value;
+  __runtime_var get_value() {
+    if (var_value != nullptr)
+      return {__var, var_value};
+    else if (obj_value != nullptr)
+      return {__object, obj_value};
+    else if (func_value != nullptr)
+      return {__func, func_value};
+    else
+      return {__ne, nullptr};
   }
 
   bool isConst() {
-    return value.isConst;
+    return var_value->isConst;
   }
 
   void setConst(bool _const) {
-    value.isConst = _const;
+    return;
+    var_value->isConst = _const;
   }
 
-  void set_value(data _value) {
+  void set_value(data *_value) {
+    reset();
     empty = false;
-    value = _value;
+    var_value = _value;
   }
 
   bool is_empty() {
@@ -65,8 +73,8 @@ public:
     return error.has_error();
   }
 
-  obj **get_obj() {
-    return &obj_value;
+  obj *get_obj() {
+    return obj_value;
   }
 
   void setName(std::string _name) {
@@ -77,23 +85,26 @@ public:
     if (error.has_error()) {
       return error.to_string();
     }
-    return value.to_string();
+    return var_value->to_string();
   }
 
-  RuntimeResult success(data _value) {
-    obj_value = nullptr;
-    value = _value;
-    empty = false;
+  RuntimeResult success(__runtime_var _value) {
+    if (_value.first == __object) {
+      obj_value = (obj *)_value.second;
+      empty = false;
+    } else if (_value.first == __var) {
+      var_value = (data *)_value.second;
+      empty = false;
+    } else if (_value.first == __func) {
+      func_value = (node *)_value.second;
+      empty = false;
+    } else {
+      empty = true;
+    }
     return *this;
   }
 
-  RuntimeResult success(obj **_obj) {
-    obj_value = *_obj;
-    empty = false;
-    return *this;
-  }
-
-  RuntimeResult success(std::vector<data> &_values) {
+  RuntimeResult success(std::vector<std::map<runtime_type, void *>> &_values) {
     obj_value = nullptr;
     values = _values;
     empty = false;

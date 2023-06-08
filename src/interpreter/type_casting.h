@@ -3,7 +3,13 @@
 #ifndef TYPE_CASTING_H
 #define TYPE_CASTING_H
 
-data type_cast(data a, types _type_to) {
+data type_cast(__runtime_var _o, types _type_to) {
+  if (_o.first != __var) {
+    auto _out = type_value();
+    _out._bool = false;
+    return data(_bool, _out);
+  }
+  data a = *((data *)_o.second);
   if (a._type == _type_to) {
     return a;
   }

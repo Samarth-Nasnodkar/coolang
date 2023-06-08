@@ -1,30 +1,18 @@
-object person {
+object Person {
   field name
-  field age
 
-  constructor(_name, _age) {
-    name = _name
-    age = _age
-  }
-
-  fn printData() {
-    print("Name =", name, ", Age = ", age)
-  }
-
-  fn updateName(_name) {
+  constructor(_name) {
     name = _name
   }
 
+  fn to_string() {
+    return "Hi! my name is " + name
+  }
 }
 
-fn makeNew(_p) {
-  return _p
+fn demo(p) {
+  println(p)
 }
 
-let p = person("Samarth", 19)
-p.printData()
-let k = makeNew(p)
-k.printData()
-p.updateName("Raj")
-p.printData()
-k.printData()
+let per = Person("Max")
+demo(per)

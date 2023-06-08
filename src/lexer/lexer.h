@@ -22,6 +22,7 @@ public:
     currentPos.advance(currentChar);
 
     currentChar = currentPos.index == text.length() ? '\0' : text[currentPos.index];
+    // std::cout << currentChar << std::endl;
   }
 
   bool isKeyword(std::string cmp) {
@@ -58,9 +59,15 @@ public:
         advance();
         continue;
       }
+
+      if (currentChar == '#') {
+        while (currentChar != '\n') advance();
+      }
+
       if (currentChar == '\n') {
         while (currentChar == '\n') advance();
-        tokens.emplace_back(Token(std::move(KEY_NEWLINE), currentPos, currentPos));
+        if (tokens[tokens.size() - 1].get_name() != KEY_NEWLINE)
+          tokens.emplace_back(Token(std::move(KEY_NEWLINE), currentPos, currentPos));
         // advance();
         continue;
       }

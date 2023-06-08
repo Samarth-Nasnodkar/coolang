@@ -404,6 +404,7 @@ public:
           Error()
         };
       }
+      
       if (currentToken.get_name() != KEY_EQ) {
         reverse();
         return parsePrec7();
