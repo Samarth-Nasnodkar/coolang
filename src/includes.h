@@ -6,6 +6,7 @@
 #include<map>
 #include<fstream>
 #include<string>
+#include<sstream>
 
 #include <math.h>
 #include <string.h>

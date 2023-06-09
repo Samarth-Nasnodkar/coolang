@@ -53,7 +53,7 @@ Variables can be declared using the `let` keyword followed by the identifier
 let a = 10
 let arr = [0] * 10
 ```
-Lists cannot hold objects yet! Will be added soon
+Lists can now hold objects and functions!!
 ### And lines don't end with semi-colons!!!
 
 ## Code Block
@@ -130,6 +130,7 @@ object Person {
   }
 }
 ```
+you can override the `to_string` method inside an object to control how it is printed!
 No self referencing keyword has been added yet, but will soon be!!! Stay tuned.  
 Also no data hiding is implemented yet (Eg. `public`/`private` fields/methods), but will soon be!!
 Also you cannot set the value of a field outside the object yet

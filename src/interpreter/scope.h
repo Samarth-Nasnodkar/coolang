@@ -1,5 +1,4 @@
 #include "../includes.h"
-#include "../variables/data.h"
 #include "../parser/node.h"
 #include "runtime_type.h"
 

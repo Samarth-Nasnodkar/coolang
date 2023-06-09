@@ -20,5 +20,9 @@ object Person {
   }
 }
 
-let _per = Person("Maya", Pet("Max"))
-println(_per.to_string())
+fn demo() {
+  println("demo!")
+}
+
+let a = [Pet("Max"), Person("Maya", Pet("Princess")), demo]
+println(a)
