@@ -342,6 +342,9 @@ public:
         for(int i = 0; i < _node->args.size(); i++) {
           auto _res = visit(__args[i], scopeIndex, payload, __args);
           if (_res.has_error()) return _res;
+          if (_res.get_value().first == __object) {
+            ((obj *)_res.get_value().second)->_name = _node->args[i].get_name();
+          }
           scopes[scopeIndex].localScope[_node->args[i].get_name()] = _res.get_value();
         }
         auto _res = visit(_node->left, scopeIndex, payload, __args);
@@ -497,7 +500,7 @@ public:
           int _indx = -1;
           if (((*payload)->_data).find(_node->token.get_name()) == ((*payload)->_data).end()) {
             int itr = scopeIndex;
-            while (itr >= 0 && getVarValue(scopes[itr], _node->token.get_name()).first != runtime_type::__var) {
+            while (itr >= 0 && getVarValue(scopes[itr], _node->token.get_name()).first == runtime_type::__ne) {
               itr--;
             }
             if (itr == -1)
@@ -508,9 +511,10 @@ public:
           auto __r = visit(_node->left, scopeIndex, payload, __args);
           if (__r.has_error()) return __r;
           auto _res = __r.get_value();
+          if (_res.first == __object) {
+            ((obj *)_res.second)->_name = _node->token.get_name();
+          }
           if (_indx != -1) {
-            if (_res.first == __object)
-              ((obj *)_res.second)->_name = _node->token.get_name();
             scopes[_indx].localScope[_node->token.get_name()] = _res;
             return RuntimeResult().success(_res);
           }
@@ -661,13 +665,24 @@ public:
         if (_res.has_error()) return _res;
         int _indx = -1;
         obj *_obj = (obj *)_res.get_value().second;
-        std::cout << _obj->_name << std::endl;
-        if (_obj == nullptr || isRegisteredObj(scopeIndex, _obj->_name) == -1) {
-          return RuntimeResult().failure(Error("Name Error", "Unknown object " + _node->left->token.get_name()));
+        bool isField = false;
+        if (_obj == nullptr || isRegisteredObj(scopeIndex, _obj->_name) < 0) {
+          if (payload != nullptr) {
+            if ((*payload)->_data.find(_obj->_name) != (*payload)->_data.end()) {
+              isField = true;
+              if ((*payload)->_data.find(_obj->_name)->second.first != __object) {
+                return RuntimeResult().failure(Error("Type Error", "Unknown object " + _node->left->token.get_name()));
+              }
+            }
+          }
+          if (!isField)
+            return RuntimeResult().failure(Error("Name Error", "Unknown object " + _node->left->token.get_name()));
         }
-        _indx = isRegisteredObj(scopeIndex, _obj->_name);
-        if (_indx == -1) return RuntimeResult().failure(Error("Name Error", "Object is not defined"));
-        auto obj_def = scopes[_indx].objectDefinition[_obj->_type];
+        if (!isField) {
+          _indx = isRegisteredObj(scopeIndex, _obj->_name);
+          if (_indx == -1) return RuntimeResult().failure(Error("Name Error", "Object is not defined"));
+        }
+        auto obj_def = _obj->_def;
         if (_node->right->value == node_type::_function_call) {
           for (auto child : obj_def->children) {
             if (child->value == node_type::_method_call) {

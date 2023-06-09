@@ -1,18 +1,24 @@
+object Pet {
+  field nick
+
+  constructor(_nick) {
+    nick = _nick
+  }
+}
+
 object Person {
   field name
+  field pet
 
-  constructor(_name) {
+  constructor(_name, _pet) {
     name = _name
+    pet = _pet
   }
 
   fn to_string() {
-    return "Hi! my name is " + name
+    return "Hi! my pet is " + pet.nick
   }
 }
 
-fn demo(p) {
-  println(p)
-}
-
-let per = Person("Max")
-demo(per)
+let _per = Person("Maya", Pet("Max"))
+println(_per.to_string())
